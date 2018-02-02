@@ -96,7 +96,9 @@ public slots:
     void usedSendingAddresses();
     /** Show used receiving addresses */
     void usedReceivingAddresses();
-
+	 /** Show used Exchange addresses */
+    void usedExchangeAddresses();
+	
     /** Re-emit encryption status signal */
     void updateEncryptionStatus();
 

@@ -636,31 +636,195 @@
      </widget>
     </widget>
    </item>
+   
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
+    <layout class="QHBoxLayout" name="horizontalLayout_31">
      <item>
-      <widget class="QLabel" name="msg1Label">
+      <widget class="QLabel" name="TXChooseLabel">
        <property name="text">
-        <string>&amp;Message:</string>
+        <string>Choose type of transaction:</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
        <property name="buddy">
-        <cstring>msgLabel</cstring>
+        <cstring>TX Choose</cstring>
        </property>
       </widget>
      </item>
-     <item>
-      <widget class="QLineEdit" name="msgLabel">
-       <property name="toolTip">
-        <string>Enter a message to include with this transaction</string>
-       </property>
-      </widget>
-     </item>
+	  <item>
+	  
+		<widget class="QRadioButton" name="PositiveTransaction">
+		 <property name="text">
+		  <string>Positive transaction</string>
+		 </property>
+		</widget>
+	   </item>
+	   <item>
+		<widget class="QRadioButton" name="NegativeTransaction">
+		 <property name="text">
+		  <string>Negative transaction</string>
+		 </property>
+		</widget>
+	   </item>
+	   <item>
+		<widget class="QRadioButton" name="SuperTransaction">
+		 <property name="text">
+		  <string>Super transaction</string>
+		 </property>
+		</widget>
+	   </item>
     </layout>
    </item>
-   <item>
+    
+	<item>
+		<layout class="QHBoxLayout" name="horizontalLayout_32">
+			<item>
+			  <widget class="QLabel" name="feedback1Label">
+			   <property name="text">
+				<string>Negative feed back transaction:</string>
+			   </property>
+			   <property name="alignment">
+				<set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+			   </property>
+			   <property name="buddy">
+				<cstring>Negative feed back transaction</cstring>
+			   </property>
+			  </widget>
+			 </item>
+			 <item>
+			  <widget class="QLineEdit" name="feedbackLabel">
+			   <property name="toolTip">
+				<string>Enter negative feed back of transaction</string>
+			   </property>
+			  </widget>
+			</item>
+		</layout>
+	</item>
+	
+	<item>
+		<layout class="QHBoxLayout" name="horizontalLayout_33">
+			<item>
+			  <widget class="QLabel" name="super1Label">
+			   <property name="text">
+				<string>URL of the Super-transactions:</string>
+			   </property>
+			   <property name="alignment">
+				<set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+			   </property>
+			   <property name="buddy">
+				<cstring>the Super-transactions</cstring>
+			   </property>
+			  </widget>
+			 </item>
+			 <item>
+			  <widget class="QLineEdit" name="superLabel">
+			   <property name="toolTip">
+				<string>Enter URL-point(http://..../api..) for exchange super transaction</string>
+			   </property>
+			  </widget>
+			 </item>
+		</layout>
+	</item>	
+	
+	<item>
+		<layout class="QHBoxLayout" name="horizontalLayout_34">
+			 <item>
+			  <widget class="QLabel" name="token1Label">
+			   <property name="text">
+				<string>Token(what to look for outside):</string>
+			   </property>
+			   <property name="alignment">
+				<set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+			   </property>
+			   <property name="buddy">
+				<cstring>tokenLabel</cstring>
+			   </property>
+			  </widget>
+			 </item>
+			 <item>
+			  <widget class="QLineEdit" name="tokenLabel">
+			   <property name="toolTip">
+				<string>Enter a token</string>
+			   </property>
+			   <property name="minimumSize">
+					<size>
+					 <width>150</width>
+					 <height>0</height>
+					</size>
+				   </property>
+				   <property name="maximumSize">
+					<size>
+					 <width>150</width>
+					 <height>16777215</height>
+					</size>
+				   </property>
+			  </widget>
+			  </item>
+			  <item>
+			  <spacer name="horizontalSpacer">
+			   <property name="orientation">
+				<enum>Qt::Horizontal</enum>
+			   </property>
+			   <property name="sizeHint" stdset="0">
+				<size>
+				 <width>40</width>
+				 <height>20</height>
+				</size>
+			   </property>
+			  </spacer>
+			 </item>
+		</layout>
+	</item>
+	
+	<item>
+		<layout class="QHBoxLayout" name="horizontalLayout_35">	
+			 <item>
+			  <widget class="QLabel" name="tvalue1Label">
+			   <property name="text">
+				<string>Token value(options):</string>
+			   </property>
+			   <property name="alignment">
+				<set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+			   </property>
+			   <property name="buddy">
+				<cstring>tvalueLabel</cstring>
+			   </property>
+			  </widget>
+			 </item>
+			 <item>
+			  <widget class="QLineEdit" name="tvalueLabel">
+			   <property name="minimumSize">
+					<size>
+					 <width>150</width>
+					 <height>0</height>
+					</size>
+				   </property>
+				   <property name="maximumSize">
+					<size>
+					 <width>150</width>
+					 <height>16777215</height>
+					</size>
+				   </property>
+			  </widget>
+			 </item>
+			 <item>
+			  <spacer name="horizontalSpacer">
+			   <property name="orientation">
+				<enum>Qt::Horizontal</enum>
+			   </property>
+			   <property name="sizeHint" stdset="0">
+				<size>
+				 <width>40</width>
+				 <height>20</height>
+				</size>
+			   </property>
+			  </spacer>
+			 </item>	
+		</layout>
+	</item>
+	
+	<item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QPushButton" name="sendButton">

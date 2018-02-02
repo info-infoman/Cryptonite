@@ -86,7 +86,7 @@ void setupAddressWidget(QValidatedLineEdit *widget, QWidget *parent)
 
     widget->setFont(bitcoinAddressFont());
 #if QT_VERSION >= 0x040700
-    widget->setPlaceholderText(QObject::tr("Enter a Cryptonite address (e.g. CNS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)"));
+    widget->setPlaceholderText(QObject::tr("Enter a FeedBackCoin address (e.g. CNS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)"));
 #endif
     widget->setValidator(new BitcoinAddressEntryValidator(parent));
     widget->setCheckValidator(new BitcoinAddressCheckValidator(parent));
@@ -104,7 +104,7 @@ void setupAmountWidget(QLineEdit *widget, QWidget *parent)
 bool parseBitcoinURI(const QUrl &uri, SendCoinsRecipient *out)
 {
     // return if URI is not valid or is no bitcoin: URI
-    if(!uri.isValid() || uri.scheme() != QString("cryptonite"))
+    if(!uri.isValid() || uri.scheme() != QString("feedbackcoin"))
         return false;
 
     SendCoinsRecipient rv;
@@ -135,7 +135,7 @@ bool parseBitcoinURI(const QUrl &uri, SendCoinsRecipient *out)
         {
             if(!i->second.isEmpty())
             {
-                if(!BitcoinUnits::parse(BitcoinUnits::XCN, i->second, &rv.amount))
+                if(!BitcoinUnits::parse(BitcoinUnits::FBC, i->second, &rv.amount))
                 {
                     return false;
                 }
@@ -159,9 +159,9 @@ bool parseBitcoinURI(QString uri, SendCoinsRecipient *out)
     //
     //    Cannot handle this later, because bitcoin:// will cause Qt to see the part after // as host,
     //    which will lower-case it (and thus invalidate the address).
-    if(uri.startsWith("cryptonite://", Qt::CaseInsensitive))
+    if(uri.startsWith("feedbackcoin://", Qt::CaseInsensitive))
     {
-        uri.replace(0, 13, "cryptonite:"); 
+        uri.replace(0, 13, "feedbackcoin:"); 
     }
     QUrl uriInstance(uri);
     return parseBitcoinURI(uriInstance, out);
@@ -169,12 +169,12 @@ bool parseBitcoinURI(QString uri, SendCoinsRecipient *out)
 
 QString formatBitcoinURI(const SendCoinsRecipient &info)
 {
-    QString ret = QString("cryptonite:%1").arg(info.address);
+    QString ret = QString("feedbackcoin:%1").arg(info.address);
     int paramCount = 0;
 
     if (info.amount)
     {
-        ret += QString("?amount=%1").arg(BitcoinUnits::format(BitcoinUnits::XCN, info.amount));
+        ret += QString("?amount=%1").arg(BitcoinUnits::format(BitcoinUnits::FBC, info.amount));
         paramCount++;
     }
 

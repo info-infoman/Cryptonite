@@ -56,10 +56,10 @@ Value importprivkey(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() < 1 || params.size() > 3)
         throw runtime_error(
-            "importprivkey \"cryptoniteprivkey\" ( \"label\" rescan )\n"
+            "importprivkey \"feedbackcoinprivkey\" ( \"label\" rescan )\n"
             "\nAdds a private key (as returned by dumpprivkey) to your wallet.\n"
             "\nArguments:\n"
-            "1. \"cryptoniteprivkey\"   (string, required) The private key (see dumpprivkey)\n"
+            "1. \"feedbackcoinprivkey\"   (string, required) The private key (see dumpprivkey)\n"
             "2. \"label\"            (string, optional) an optional label\n"
             "3. rescan               (boolean, optional, default=true) Rescan the wallet for transactions\n"
             "\nExamples:\n"
@@ -209,11 +209,11 @@ Value dumpprivkey(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() != 1)
         throw runtime_error(
-            "dumpprivkey \"cryptoniteaddress\"\n"
-            "\nReveals the private key corresponding to 'cryptoniteaddress'.\n"
+            "dumpprivkey \"feedbackcoinaddress\"\n"
+            "\nReveals the private key corresponding to 'feedbackcoinaddress'.\n"
             "Then the importprivkey can be used with this output\n"
             "\nArguments:\n"
-            "1. \"cryptoniteaddress\"   (string, required) The cryptonite address for the private key\n"
+            "1. \"feedbackcoinaddress\"   (string, required) The feedbackcoin address for the private key\n"
             "\nResult:\n"
             "\"key\"                (string) The private key\n"
             "\nExamples:\n"
@@ -227,7 +227,7 @@ Value dumpprivkey(const Array& params, bool fHelp)
     string strAddress = params[0].get_str();
     CBitcoinAddress address;
     if (!address.SetString(strAddress))
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid Cryptonite address");
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid feedbackcoin address");
     CKeyID keyID;
     if (!address.GetKeyID(keyID))
         throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to a key");
@@ -264,7 +264,7 @@ Value dumpwallet(const Array& params, bool fHelp)
     pwalletMain->GetAllKeys(setKeyPool);
 
     // produce output
-    file << strprintf("# Wallet dump created by Cryptonite %s (%s)\n", CLIENT_BUILD, CLIENT_DATE);
+    file << strprintf("# Wallet dump created by FeedBackCoin %s (%s)\n", CLIENT_BUILD, CLIENT_DATE);
     file << strprintf("# * Created on %s\n", EncodeDumpTime(GetTime()));
     file << strprintf("# * Best block at time of backup was %i (%s),\n", chainActive.Height(), chainActive.Tip()->GetBlockHash().ToString());
     file << strprintf("#   mined on %s\n", EncodeDumpTime(chainActive.Tip()->nTime));

@@ -479,7 +479,7 @@ static void InterpretNegativeSetting(string name, map<string, string>& mapSettin
 std::string strCommandLine;
 
 void ParseParameters(int argc, const char* const argv[])
-{
+{   
     for(int i=0; i < argc; i++)
     	strCommandLine += std::string(argv[i]) + " ";
 
@@ -938,7 +938,7 @@ static std::string FormatException(std::exception* pex, const char* pszThread)
     char pszModule[MAX_PATH] = "";
     GetModuleFileNameA(NULL, pszModule, sizeof(pszModule));
 #else
-    const char* pszModule = "cryptonite";
+    const char* pszModule = "feedbackcoin";
 #endif
     if (pex)
         return strprintf(
@@ -971,7 +971,7 @@ boost::filesystem::path GetDefaultDataDir()
     // Unix: ~/.bitcoin
 #ifdef WIN32
     // Windows
-    return GetSpecialFolderPath(CSIDL_APPDATA) / "Cryptonite";
+    return GetSpecialFolderPath(CSIDL_APPDATA) / "FeedBackCoin";
 #else
     fs::path pathRet;
     char* pszHome = getenv("HOME");
@@ -983,10 +983,10 @@ boost::filesystem::path GetDefaultDataDir()
     // Mac
     pathRet /= "Library/Application Support";
     TryCreateDirectory(pathRet);
-    return pathRet / "Cryptonite";
+    return pathRet / "FeedBackCoin";
 #else
     // Unix
-    return pathRet / ".cryptonite";
+    return pathRet / ".feedbackcoin";
 #endif
 #endif
 }
@@ -1035,7 +1035,7 @@ void ClearDatadirCache()
 
 boost::filesystem::path GetConfigFile()
 {
-    boost::filesystem::path pathConfigFile(GetArg("-conf", "cryptonite.conf"));
+    boost::filesystem::path pathConfigFile(GetArg("-conf", "feedbackcoin.conf"));
     if (!pathConfigFile.is_complete()) pathConfigFile = GetDataDir(false) / pathConfigFile;
     return pathConfigFile;
 }
@@ -1045,14 +1045,14 @@ void ReadConfigFile(map<string, string>& mapSettingsRet,
 {
     boost::filesystem::ifstream streamConfig(GetConfigFile());
     if (!streamConfig.good())
-        return; // No cryptonite.conf file is OK
+        return; // No feedbackcoin.conf file is OK
 
     set<string> setOptions;
     setOptions.insert("*");
 
     for (boost::program_options::detail::config_file_iterator it(streamConfig, setOptions), end; it != end; ++it)
     {
-        // Don't overwrite existing settings so command line settings override cryptonite.conf
+        // Don't overwrite existing settings so command line settings override feedbackcoin.conf
         string strKey = string("-") + it->string_key;
         if (mapSettingsRet.count(strKey) == 0)
         {
@@ -1068,7 +1068,7 @@ void ReadConfigFile(map<string, string>& mapSettingsRet,
 
 boost::filesystem::path GetPidFile()
 {
-    boost::filesystem::path pathPidFile(GetArg("-pid", "cryptonited.pid"));
+    boost::filesystem::path pathPidFile(GetArg("-pid", "feedbackcoind.pid"));
     if (!pathPidFile.is_complete()) pathPidFile = GetDataDir() / pathPidFile;
     return pathPidFile;
 }
@@ -1301,7 +1301,7 @@ void AddTimeData(const CNetAddr& ip, int64_t nTime)
                 if (!fMatch)
                 {
                     fDone = true;
-                    string strMessage = _("Warning: Please check that your computer's date and time are correct! If your clock is wrong Cryptonite will not work properly.");
+                    string strMessage = _("Warning: Please check that your computer's date and time are correct! If your clock is wrong feedbackcoin will not work properly.");
                     strMiscWarning = strMessage;
                     LogPrintf("*** %s\n", strMessage);
                     uiInterface.ThreadSafeMessageBox(strMessage, "", CClientUIInterface::MSG_WARNING);

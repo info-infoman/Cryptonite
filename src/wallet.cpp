@@ -17,6 +17,7 @@ using namespace std;
 
 // Settings
 int64_t nTransactionFee = 1000;
+int64_t nTransactionFFee = 1000;
 bool bSpendZeroConfChange = false; //Can't support this with current accepttomempool
 
 //Notice: other code currently makes the assumption that walletdb is maintaining mempool with scheduled tx
@@ -511,8 +512,20 @@ bool CWallet::AddToWallet(const CWalletTx& wtxIn, bool fFromLoadWallet)
 bool CWallet::AddToWalletIfInvolvingMe(const uint256 &hash, const CTransaction& tx, const CBlock* pblock, bool fUpdate)
 {
     {
+			
         AssertLockHeld(cs_wallet);
         bool fExisted = mapWallet.count(hash);
+		if (!tx.IsCoinBase())
+		{
+			
+			BOOST_FOREACH(const CTxIn& txin, tx.vin)
+				{
+					BOOST_FOREACH(const CTxOut& txout, tx.vout)
+					{
+						GetAccountForTx(txin, txout, tx);
+					}		
+				}	
+		}
         if (fExisted && !fUpdate) return false;
         if (fExisted || IsMine(tx) || IsFromMe(tx))
         {
@@ -903,6 +916,12 @@ bool CWallet::CreateTransaction(const map<CKeyID, int64_t> &mapSend,
             strFailReason = _("Transaction has multiple outputs to same address");
             return false;
 	}
+	
+	// std::string strCmd = GetArg("-gen", "");
+	// if(s.first==0 && !strCmd.empty()){
+            // strFailReason = _("Can't create transaction type Exchange, witch generate mode");
+            // return false;
+	// }
 
         nValue += s.second;
 	setDisallowed.insert(s.first);
@@ -1187,8 +1206,9 @@ bool CWallet::SetAddressBook(const CTxDestination& address, const string& strNam
         if (!strPurpose.empty()) /* update purpose only if requested */
             mapAddressBook[address].purpose = strPurpose;
     }
+	uint64_t Balance = GetAddressBalance(address);
     NotifyAddressBookChanged(this, address, strName, IsMine(boost::get<CKeyID>(address)),
-                             strPurpose, (fUpdated ? CT_UPDATED : CT_NEW) );
+                             strPurpose, (fUpdated ? CT_UPDATED : CT_NEW), Balance );
     if (!fFileBacked)
         return false;
     if (!strPurpose.empty() && !CWalletDB(strWalletFile).WritePurpose(CBitcoinAddress(address).ToString(), strPurpose))
@@ -1212,8 +1232,8 @@ bool CWallet::DelAddressBook(const CTxDestination& address)
         }
         mapAddressBook.erase(address);
     }
-
-    NotifyAddressBookChanged(this, address, "", IsMine(boost::get<CKeyID>(address)), "", CT_DELETED);
+	uint64_t Balance = GetAddressBalance(address);
+    NotifyAddressBookChanged(this, address, "", IsMine(boost::get<CKeyID>(address)), "", CT_DELETED, Balance);
 
     if (!fFileBacked)
         return false;
@@ -1401,6 +1421,19 @@ std::map<CTxDestination, uint64_t> CWallet::GetAddressBalances()
     return ret;
 }
 
+int64_t CWallet::GetAddressBalance(const CTxDestination& address)
+{
+	uint160 key = boost::get<CKeyID>(address);
+    LOCK(cs_wallet);
+
+    vector<uint160> vecKey;
+	vecKey.push_back(key);
+	vector<CActInfo> balances;
+	pviewTip->ConservativeBalances(0, vecKey, balances); 
+	//LogPrintf("GetAddressBalance\n");
+    return balances[0].balance;
+}
+
 set< set<CTxDestination> > CWallet::GetAddressGroupings()
 {
     AssertLockHeld(cs_wallet); // mapWallet
@@ -1484,6 +1517,102 @@ set< set<CTxDestination> > CWallet::GetAddressGroupings()
     }
 
     return ret;
+}
+
+
+
+
+void CWallet::GetAccountForTx(const CTxIn& txin, const CTxOut& txout, const CTransaction& tx)
+{
+    //CBitcoinAddress address(key.get_str());
+	int nDepth = GetDepthInMainChain(tx.GetTxID());
+	//минимальный порог комиссии против спама
+	int64_t nTxFees = tx.GetValueIn()-tx.GetValueOut();
+	bool ffee=true;
+	if(nTxFees<GetArg("-minastxfee", nTransactionFFee)){
+		ffee=false;
+	}
+	// int64_t nValueIn = tx.GetValueIn();
+    // int64_t nValueOut = tx.GetValueOut();
+    // int64_t nFees = nValueIn-nValueOut;
+	const CTxDestination addressIn=CKeyID(txin.pubKey); 
+	const CTxDestination addressOut=CKeyID(txout.pubKey);
+	
+	LOCK(cs_wallet);
+	//Добавление и обновление адресов в книге торгов
+	//Проверим транзакции относящиеся к покупателям монеты, добавим или обновим их в книге торгов
+	//Транзакция должна быть не от меня, отрицательная, адрес отправки не должен относится к адресам на которые уже отправлял(отслеживание мошенников), на коинбазу, и подтверждаться 1 блоком.
+	if(txout.pubKey==0 && !IsFromMe(tx) && nDepth>0 && tx.txType==1 && ffee){
+		//внести в книгу торгов или обновить адреса желающие приобрести коины, установить тип адреса Exchange 
+		//где сообщение становится меткой
+		string strNewName=std::string(tx.feedback.data(), tx.feedback.size());
+		std::map<CTxDestination, CAddressBookData>::iterator mi = mapAddressBook.find(addressIn);
+		if (mi != mapAddressBook.end()){
+			if(mapAddressBook[addressIn].purpose=="Exchange"){
+				SetAddressBook(addressIn, strNewName, "Exchange");	
+			}
+		}else{
+			SetAddressBook(addressIn, strNewName, "Exchange");
+		}
+		
+	}
+	//Раздел для отслеживания возможных мошенников 
+	//Проверяем транзакции которые возможно идут с тех кошельков на которые мы отправляли ранее монеты
+	//это необходимо чтобы отслеживать траты возможных мошенников
+	//не от меня, и не отрицательная транзакция, не мне
+	if (!IsFromMe(tx) && !IsMine(tx) && !tx.txType==1){
+		string strNewName="";
+		string strOldName="";
+		std::map<CTxDestination, CAddressBookData>::iterator mi = mapAddressBook.find(addressIn);
+		//если есть в адресной книге 
+		if (mi != mapAddressBook.end()){
+			//и не участвует в торгах то
+			if(mapAddressBook[addressIn].purpose=="send"){
+				//назовем адрес куда переводили монеты адресом который есть в книге или меткой старого адреса
+				if (strlen((*mi).second.name.c_str())==0)
+					strNewName = CBitcoinAddress(addressIn).ToString();
+				else
+					strNewName = (*mi).second.name;	
+				
+				std::map<CTxDestination, CAddressBookData>::iterator mi = mapAddressBook.find(addressOut);
+				if (mi != mapAddressBook.end()){
+					//size_t pos = (*mi).second.name.find(strNewName);
+					strOldName=(*mi).second.name;
+					if ((*mi).second.name.find(strNewName) == std::string::npos)
+						strNewName=strOldName+"; "+strNewName;
+				}
+					
+				SetAddressBook(addressOut, strNewName, "send");
+			}
+			
+		}
+	}
+	//Раздел закрытия сделки
+	//Проверяем транзакции продавцов монет отправленные не мне, чтобы удалить подтвержденные сделки из книги торгов
+	//супер, мои и чужие, не мне, подтвержденные
+	if(tx.txType==2 && nDepth>0 && !IsMine(tx)){
+		std::map<CTxDestination, CAddressBookData>::iterator mi = mapAddressBook.find(addressOut);
+		//Если получатель транзакции найден в торговой книге то
+		if (mi != mapAddressBook.end()){
+			if(mapAddressBook[addressOut].purpose=="Exchange"){
+				 string strNewName = "Close from Exchange "+(*mi).second.name;	
+				 LogPrintf("Close!");
+				//TODO посмотреть что работает быстрее trieview или wallet
+				//Если баланс адреса больше или равно  числовому представлению  имени адреса + числовое представление запроса об оплате
+				// то удаляем адрес из книги ставок биржи
+				// TODO и если не транзакция сделки
+				// uint64_t Balance=0;
+				// Balance=GetAddressBalance(addressOut);	
+				// int msgInt = std::stoull((*mi).second.name);	
+				//Если от меня то сносим в адресную книгу для отслеживания иначе удаляем из книги торгов
+				if (!IsFromMe(tx)){	
+					DelAddressBook(addressOut);
+				}else{
+					SetAddressBook(addressOut, strNewName, "send");
+				}
+			}
+		}
+	}		
 }
 
 set<CTxDestination> CWallet::GetAccountAddresses(string strAccount) const

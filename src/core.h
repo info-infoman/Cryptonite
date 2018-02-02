@@ -172,7 +172,11 @@ public:
     int nVersion;
     mutable std::vector<CTxIn> vin;
     mutable std::vector<CTxOut> vout;
-    std::vector<char> msg;
+	std::vector<char> feedback;
+    std::vector<char> url;
+	std::vector<char> token;
+	std::vector<char> tvalue;
+	uint64_t txType;
     uint64_t nLockHeight;
     mutable uint64_t nLimitValue;
     mutable bool fSetLimit;
@@ -199,7 +203,11 @@ public:
         nVersion = this->nVersion;
         READWRITE(vint);
         READWRITE(voutt);
-	READWRITE(msg);
+	READWRITE(feedback);
+	READWRITE(url);
+	READWRITE(token);
+	READWRITE(tvalue);
+	READWRITE(txType);
         READWRITE(nLockHeight);
 
 	if(fRead){
@@ -221,6 +229,7 @@ public:
         vout.clear();
         nLockHeight = 0;
 	nLimitValue = 0;
+	txType = 0;
 	fSetLimit=false;
     }
 
@@ -255,6 +264,7 @@ public:
         return (a.nVersion  == b.nVersion &&
                 a.vin       == b.vin &&
                 a.vout      == b.vout &&
+				a.txType      == b.txType &&
                 a.nLockHeight == b.nLockHeight);
     }
 

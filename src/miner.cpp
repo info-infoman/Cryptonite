@@ -5,6 +5,8 @@
 
 #include "miner.h"
 
+#include "rpcclient.h"
+
 #include "core.h"
 #include "main.h"
 #include "net.h"
@@ -102,9 +104,15 @@ CBlockTemplate* CreateNewBlock(uint160 pubKey)
     txNew.vin[0].SetNull();
     txNew.vout.resize(1);
     txNew.vout[0].pubKey = pubKey;//build transaction!!!!;
-    string msg = gen_random();
-    txNew.msg = vector<char>(msg.begin(),msg.end());
-
+	txNew.txType=0;
+    string feedback="";
+    txNew.feedback = vector<char>(feedback.begin(),feedback.end());
+	string url = "";
+	string token = "";
+	string tvalue = "";
+	txNew.url = vector<char>(url.begin(),url.end());
+    txNew.token = vector<char>(token.begin(),token.end());
+	txNew.tvalue = vector<char>(tvalue.begin(),tvalue.end());
     // Add our coinbase tx as first transaction
     pblock->vtx.push_back(txNew);
     pblocktemplate->vTxFees.push_back(-1); // updated at end
@@ -277,7 +285,73 @@ CBlockTemplate* CreateNewBlock(uint160 pubKey)
             //Double check signatures
             if (!CheckInputs(tx, state))
                 continue;
-
+		//todo
+		//Добавить параметры повторной проверки и удаления из mempool
+		//mempool.remove(tx);
+		//chek external world token in SuperTransactions
+		
+		bool Fchekstx=true;
+			
+		if (tx.txType==2){
+			string External=std::string(tx.url.data(), tx.url.size());
+			if(External.substr(0, 4)=="http"){
+				//Remove if we are not check supertransactions
+				if(GetBoolArg("-enableverif", true)==false){
+					mempool.remove(tx);
+					continue;
+				}
+				//Remove if Duration to check of supertransactions is exceeded
+				//std::cout << " duratverif = ?" << chainActive.Height() - tx.nLockHeight <<" > "<< GetArg("-duratverif", 1000) << std::endl;
+				if((chainActive.Height()-tx.nLockHeight)>GetArg("-duratverif", 1000)){
+					mempool.remove(tx);
+					continue;
+				}
+				//Remove if TxFees to small to check of supertransactions 
+				//std::cout << " minastxfee = ?" << nTxFees << " < " << GetArg("-minastxfee", nTransactionFFee) << std::endl;
+				if(nTxFees<GetArg("-minastxfee", nTransactionFFee)){
+					mempool.remove(tx);
+					continue;
+				}
+				//Check frequency of verification of supertransactions
+				int64_t f;
+				f=chainActive.Height()-tx.nLockHeight;
+				if ((f%GetArg("-freqverif", 10)))
+					continue;
+				
+				if (tx.token.size()>0){
+					string URL=External.substr(0);
+					std::size_t ProtocolEx =0;
+					std::size_t HostEx =0;
+					string Protocol=URL.substr(0, (URL.find('://')-1));
+					ProtocolEx = URL.find('://')+2;
+					
+					string pHost=URL.substr(ProtocolEx);
+					
+					string Host=pHost.substr(0, (pHost.find('/')));
+					HostEx = pHost.find('/');
+					
+					std::size_t posp =(ProtocolEx+HostEx);
+					string Patch=URL.substr(posp);
+					
+					string token_=std::string(tx.token.data(), tx.token.size());
+					
+					string tvalue_=std::string(tx.tvalue.data(), tx.tvalue.size());
+					//std::cout << " protocol: " << Protocol << " Host: " << Host << " Patch: " << Patch << " Token: " << token_ << " Token value: " << tvalue_ << std::endl;
+					bool Fchekstx=CheckSuperTransaction(Protocol, Host, Patch, token_, tvalue_);
+					if (!Fchekstx)
+						continue;
+				}else{
+					mempool.remove(tx);
+					continue;
+				}	
+			}else{
+				mempool.remove(tx);
+				continue;
+			}
+			
+		}
+		
+		//
 	    BOOST_FOREACH(const CTxIn& txin, tx.vin){
 		setTxOps.insert(txin.pubKey);
 	    }
@@ -333,6 +407,8 @@ CBlockTemplate* CreateNewBlock(uint160 pubKey)
 
     return pblocktemplate.release();
 }
+
+
 
 #ifdef ENABLE_WALLET
 //////////////////////////////////////////////////////////////////////////////

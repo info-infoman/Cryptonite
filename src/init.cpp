@@ -110,7 +110,7 @@ void Shutdown()
     TRY_LOCK(cs_Shutdown, lockShutdown);
     if (!lockShutdown) return;
 
-    RenameThread("cryptonite-shutoff");
+    RenameThread("feedbackcoin-shutoff");
     mempool.AddTransactionsUpdated(1);
     StopRPCThreads();
     ShutdownRPCMining();
@@ -179,7 +179,7 @@ void HandleSIGABORT(int sig)
     backtrace();
     exit(1);
 }
-#endif
+#endif 
 
 bool static InitError(const std::string &str)
 {
@@ -221,7 +221,7 @@ std::string HelpMessage(HelpMessageMode hmm)
     strUsage += "  -blocknotify=<cmd>     " + _("Execute command when the best block changes (%s in cmd is replaced by block hash)") + "\n";
     strUsage += "  -checkblocks=<n>       " + _("How many blocks to check at startup (default: 288, 0 = all)") + "\n";
     strUsage += "  -checklevel=<n>        " + _("How thorough the block verification of -checkblocks is (0-4, default: 3)") + "\n";
-    strUsage += "  -conf=<file>           " + _("Specify configuration file (default: cryptonite.conf)") + "\n";
+    strUsage += "  -conf=<file>           " + _("Specify configuration file (default: feedbackcoin.conf)") + "\n";
     if (hmm == HMM_BITCOIND)
     {
 #if !defined(WIN32)
@@ -233,7 +233,7 @@ std::string HelpMessage(HelpMessageMode hmm)
     strUsage += "  -keypool=<n>           " + _("Set key pool size to <n> (default: 100)") + "\n";
     strUsage += "  -loadblock=<file>      " + _("Imports blocks from external blk000??.dat file") + " " + _("on startup") + "\n";
     strUsage += "  -par=<n>               " + strprintf(_("Set the number of script verification threads (%u to %d, 0 = auto, <0 = leave that many cores free, default: %d)"), -(int)boost::thread::hardware_concurrency(), MAX_SCRIPTCHECK_THREADS, DEFAULT_SCRIPTCHECK_THREADS) + "\n";
-    strUsage += "  -pid=<file>            " + _("Specify pid file (default: cryptonited.pid)") + "\n";
+    strUsage += "  -pid=<file>            " + _("Specify pid file (default: feedbackcoind.pid)") + "\n";
     strUsage += "  -reindex               " + _("Rebuild block chain index from current blk000??.dat files") + " " + _("on startup") + "\n";
     strUsage += "  -txindex               " + _("Maintain a full transaction index (default: 0)") + "\n";
 
@@ -273,7 +273,7 @@ std::string HelpMessage(HelpMessageMode hmm)
     strUsage += "\n" + _("Wallet options:") + "\n";
     strUsage += "  -disablewallet         " + _("Do not load the wallet and disable wallet RPC calls") + "\n";
     strUsage += "  -paytxfee=<amt>        " + _("Fee per kB to add to transactions you send") + "\n";
-    strUsage += "  -rescan                " + _("Rescan the block chain for missing wallet transactions") + " " + _("on startup") + "\n";
+	strUsage += "  -rescan                " + _("Rescan the block chain for missing wallet transactions") + " " + _("on startup") + "\n";
     strUsage += "  -salvagewallet         " + _("Attempt to recover private keys from a corrupt wallet.dat") + " " + _("on startup") + "\n";
     strUsage += "  -spendzeroconfchange   " + _("Spend unconfirmed change when sending transactions (default: 1)") + "\n";
     strUsage += "  -upgradewallet         " + _("Upgrade wallet to latest format") + " " + _("on startup") + "\n";
@@ -303,7 +303,12 @@ std::string HelpMessage(HelpMessageMode hmm)
     strUsage += ".\n";
     strUsage += "  -gen                   " + _("Generate coins (default: 0)") + "\n";
     strUsage += "  -genproclimit=<n>      " + _("Set the processor limit for when generation is on (-1 = unlimited, default: -1)") + "\n";
-    strUsage += "  -help-debug            " + _("Show all debugging options (usage: --help -help-debug)") + "\n";
+	strUsage += "  -enableverif=<n>      " + _("Set the enable verification of supertransactions default true: 1") + "\n";
+	strUsage += "  -freqverif=<n>      " + _("Set the frequency of verification of supertransactions per every <n> blocks  default: 10") + "\n";	
+	strUsage += "  -depthverif=<n>      " + _("Set the how depth of verification of supertransactions (symbols=Headline + content) default: 1000") + "\n"; 
+	strUsage += "  -duratverif=<n>      " + _("Set the Duration of verification of supertransactions (after <n> blocks) default: 1000") + "\n"; 
+    strUsage += "  -minastxfee=<amt>        " + _("min Fee to add Ask transactions in you exchange book (antispam) && Fee to add to check Supertransactions of node (for node\pool) default: "+ CTransaction::nMinTxFee) + "\n";
+	strUsage += "  -help-debug            " + _("Show all debugging options (usage: --help -help-debug)") + "\n";
     strUsage += "  -logtimestamps         " + _("Prepend debug output with timestamp (default: 1)") + "\n";
     if (GetBoolArg("-help-debug", false))
     {
@@ -311,7 +316,7 @@ std::string HelpMessage(HelpMessageMode hmm)
         strUsage += "  -maxsigcachesize=<n>   " + _("Limit size of signature cache to <n> entries (default: 50000)") + "\n";
     }
     strUsage += "  -mintxfee=<amt>        " + _("Fees smaller than this are considered zero fee (for transaction creation) (default:") + " " + FormatMoney(CTransaction::nMinTxFee) + ")" + "\n";
-    strUsage += "  -minrelaytxfee=<amt>   " + _("Fees smaller than this are considered zero fee (for relaying) (default:") + " " + FormatMoney(CTransaction::nMinRelayTxFee) + ")" + "\n";
+	strUsage += "  -minrelaytxfee=<amt>   " + _("Fees smaller than this are considered zero fee (for relaying) (default:") + " " + FormatMoney(CTransaction::nMinRelayTxFee) + ")" + "\n";
     strUsage += "  -printtoconsole        " + _("Send trace/debug info to console instead of debug.log file") + "\n";
     if (GetBoolArg("-help-debug", false))
     {
@@ -338,9 +343,9 @@ std::string HelpMessage(HelpMessageMode hmm)
     strUsage += "  -rpcport=<port>        " + _("Listen for JSON-RPC connections on <port> (default: 8252 or testnet: 18252)") + "\n";
     strUsage += "  -rpcallowip=<ip>       " + _("Allow JSON-RPC connections from specified IP address") + "\n";
     strUsage += "  -rpcthreads=<n>        " + _("Set the number of threads to service RPC calls (default: 4)") + "\n";
-    strUsage += "  -epamounts=<n>         " + _("Use Extended Precision amounts in RPC calls (default: 1, 0 to disable)") + "\n";
-
-    strUsage += "\n" + _("RPC SSL options: (see the Cryptonite Wiki for SSL setup instructions)") + "\n";
+	strUsage += "  -epamounts=<n>         " + _("Use Extended Precision amounts in RPC calls (default: 1, 0 to disable)") + "\n";
+	
+    strUsage += "\n" + _("RPC SSL options: (see the FeedBackCoin Wiki for SSL setup instructions)") + "\n";
     strUsage += "  -rpcssl                                  " + _("Use OpenSSL (https) for JSON-RPC connections") + "\n";
     strUsage += "  -rpcsslcertificatechainfile=<file.cert>  " + _("Server certificate file (default: server.cert)") + "\n";
     strUsage += "  -rpcsslprivatekeyfile=<file.pem>         " + _("Server private key (default: server.pem)") + "\n";
@@ -364,7 +369,7 @@ struct CImportingNow
 
 void ThreadImport(std::vector<boost::filesystem::path> vImportFiles)
 {
-    RenameThread("cryptonite-loadblk");
+    RenameThread("feedbackcoin-loadblk");
 
     // -reindex
     if (fReindex) {
@@ -482,7 +487,7 @@ bool AppInit2(boost::thread_group& threadGroup)
 #endif
 
     // ********************************************************* Step 2: parameter interactions
-    MIN_HISTORY = GetBoolArg("-testnet", false)?1000:10000;
+    MIN_HISTORY = GetBoolArg("-testnet", false)?200:200;
 
     if (mapArgs.count("-resync"))
 	SystemResync(false);
@@ -549,11 +554,10 @@ bool AppInit2(boost::thread_group& threadGroup)
         nMaxConnections = nFD - MIN_CORE_FILEDESCRIPTORS;
 
     // ********************************************************* Step 3: parameter-to-internal-flags
-
-    fEPAmounts = (GetArg("-epamounts", 1) == 1);
-    if (fEPAmounts) LogPrintf("Using Extented Precision amounts\n");
-    else LogPrintf("Using Standard Precision amounts\n");
-
+	fEPAmounts = (GetArg("-epamounts", 1) == 1);
+	if (fEPAmounts) LogPrintf("Using Extented Precision amounts\n");
+	else LogPrintf("Using Standard Precision amounts\n");
+	
     fDebug = !mapMultiArgs["-debug"].empty();
     // Special-case: if -debug=0/-nodebug is set, turn off debugging messages
     const vector<string>& categories = mapMultiArgs["-debug"];
@@ -618,6 +622,11 @@ bool AppInit2(boost::thread_group& threadGroup)
         if (nTransactionFee > nHighTransactionFeeWarning)
             InitWarning(_("Warning: -paytxfee is set very high! This is the transaction fee you will pay if you send a transaction."));
     }
+	if (mapArgs.count("-minastxfee"))
+    {
+        if (!ParseMoney(mapArgs["-minastxfee"], nTransactionFFee))
+            return InitError(strprintf(_("Invalid amount for -minastxfee=<amount>: '%s'"), mapArgs["-paytxfee"]));
+    }
     bSpendZeroConfChange = GetArg("-spendzeroconfchange", true);
 
     strWalletFile = GetArg("-wallet", "wallet.dat");
@@ -636,12 +645,12 @@ bool AppInit2(boost::thread_group& threadGroup)
     if (file) fclose(file);
     static boost::interprocess::file_lock lock(pathLockFile.string().c_str());
     if (!lock.try_lock())
-        return InitError(strprintf(_("Cannot obtain a lock on data directory %s. Cryptonite Core is probably already running."), strDataDir));
+        return InitError(strprintf(_("Cannot obtain a lock on data directory %s. FeedBackCoin Core is probably already running."), strDataDir));
 
     if (GetBoolArg("-shrinkdebugfile", !fDebug))
         ShrinkDebugFile();
     LogPrintf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-    LogPrintf("Cryptonite version %s (%s)\n", FormatFullVersion(), CLIENT_DATE);
+    LogPrintf("FeedBackCoin version %s (%s)\n", FormatFullVersion(), CLIENT_DATE);
     LogPrintf("Using OpenSSL version %s\n", SSLeay_version(SSLEAY_VERSION));
     if (!fLogTimestamps)
         LogPrintf("Startup time: %s\n", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", GetTime()));
@@ -992,10 +1001,10 @@ bool AppInit2(boost::thread_group& threadGroup)
                 InitWarning(msg);
             }
             else if (nLoadWalletRet == DB_TOO_NEW)
-                strErrors << _("Error loading wallet.dat: Wallet requires newer version of Cryptonite") << "\n";
+                strErrors << _("Error loading wallet.dat: Wallet requires newer version of FeedBackCoin") << "\n";
             else if (nLoadWalletRet == DB_NEED_REWRITE)
             {
-                strErrors << _("Wallet needed to be rewritten: restart Cryptonite to complete") << "\n";
+                strErrors << _("Wallet needed to be rewritten: restart FeedBackCoin to complete") << "\n";
                 LogPrintf("%s", strErrors.str());
                 return InitError(strErrors.str());
             }

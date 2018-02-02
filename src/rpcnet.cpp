@@ -212,7 +212,7 @@ Value getaddednodeinfo(const Array& params, bool fHelp)
             "    \"connected\" : true|false,          (boolean) If connected\n"
             "    \"addresses\" : [\n"
             "       {\n"
-            "         \"address\" : \"192.168.0.201:8333\",  (string) The cryptonite server host and port\n" //TODO: port wrong here
+            "         \"address\" : \"192.168.0.201:8333\",  (string) The feedbackcoin server host and port\n" //TODO: port wrong here
             "         \"connected\" : \"outbound\"           (string) connection, inbound or outbound\n"
             "       }\n"
             "       ,...\n"

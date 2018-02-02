@@ -79,6 +79,7 @@ TransactionView::TransactionView(QWidget *parent) :
     typeWidget->addItem(tr("Mined"), TransactionFilterProxy::TYPE(TransactionRecord::Generated));
     typeWidget->addItem(tr("Other"), TransactionFilterProxy::TYPE(TransactionRecord::Other));
     typeWidget->addItem(tr("Set limit"), TransactionFilterProxy::TYPE(TransactionRecord::SetLimit));
+	typeWidget->addItem(tr("Exchange"), TransactionFilterProxy::TYPE(TransactionRecord::Exchange));
 
     hlayout->addWidget(typeWidget);
 

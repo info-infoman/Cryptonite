@@ -12,6 +12,7 @@
 #include "json/json_spirit_value.h"	
 
 int CommandLineRPC(int argc, char *argv[]);
+bool CheckSuperTransaction(const std::string &Protocol, const std::string &Host, const std::string &Patch, const std::string &token_, const std::string &tvalue_);
 
 json_spirit::Array RPCConvertValues(const std::string &strMethod, const std::vector<std::string> &strParams);
 

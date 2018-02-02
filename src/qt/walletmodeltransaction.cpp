@@ -6,15 +6,22 @@
 
 #include "wallet.h"
 
-WalletModelTransaction::WalletModelTransaction(const QList<SendCoinsRecipient> &recipients, QString message) :
+WalletModelTransaction::WalletModelTransaction(const QList<SendCoinsRecipient> &recipients, qint64 txType_, QString feedback_, QString url_, QString token_, QString tvalue_) :
     recipients(recipients),
     walletTransaction(0),
     keyChange(0),
     fee(0)
 {
     walletTransaction = new CWalletTx();
-    string msg = message.toStdString();
-    walletTransaction->msg = vector<char>(msg.begin(),msg.end());
+	walletTransaction->txType = txType_;
+	string feedback = feedback_.toStdString();
+    walletTransaction->feedback = vector<char>(feedback.begin(),feedback.end());
+    string url = url_.toStdString();
+    walletTransaction->url = vector<char>(url.begin(),url.end());
+	string token = token_.toStdString();
+    walletTransaction->token = vector<char>(token.begin(),token.end());
+	string tvalue = tvalue_.toStdString();
+    walletTransaction->tvalue = vector<char>(tvalue.begin(),tvalue.end());
 }
 
 WalletModelTransaction::~WalletModelTransaction()

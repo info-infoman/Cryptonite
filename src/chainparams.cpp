@@ -22,7 +22,7 @@ using namespace boost::assign;
 
 unsigned int pnSeed[] =
 {
-   0x0ce5bb25, 0x0ee5bb25, 0xe4540905
+   0xC0A80071, 0x55713CAD
 };
 
 void MineGenesis(CBlock genesis){
@@ -59,8 +59,8 @@ public:
         pchMessageStart[2] = 0xb4;
         pchMessageStart[3] = 0xd9;
         vAlertPubKey = ParseHex("038b1e94fa4d647bb8ea50b1540b2a04846181fd10d87e35b609311054ab02cba3");
-        nDefaultPort = 8253;
-        nRPCPort = 8252;
+        nDefaultPort = 8254;
+        nRPCPort = 8253;
         bnProofOfWorkLimit = CBigNum(~uint256(0) >> 20);
         nSubsidyHalvingInterval = 210000;
 
@@ -79,9 +79,17 @@ public:
         txNew.vout.resize(1);
         txNew.vout[0].nValue = MAX_MONEY; //All coins created in genesis
         txNew.vout[0].pubKey = 0; //Genesis target is coinbase
-        txNew.nLockHeight=0;	
-	string msg = "2014/07/27 - Epoch Times - How Bitcoin Compares...";
-	txNew.msg = vector<char>(msg.begin(),msg.end());
+        txNew.nLockHeight=0;
+	txNew.txType=0;	
+	string feedback = "";
+	string url = "";
+	string token = "";
+	string tvalue = "";
+	txNew.feedback = vector<char>(feedback.begin(),feedback.end());
+	txNew.url = vector<char>(url.begin(),url.end());
+	txNew.token = vector<char>(token.begin(),token.end());
+	txNew.tvalue = vector<char>(tvalue.begin(),tvalue.end());
+	
 	genesis.vtx.push_back(txNew);
         genesis.hashPrevBlock = 0;
         genesis.hashMerkleRoot = genesis.BuildMerkleTree();
@@ -95,25 +103,27 @@ public:
 	delete coinbase;
         genesis.nVersion = 1;
 	genesis.nHeight  = 0;
-        genesis.nTime    = 1406509200;
-        genesis.nNonce   = 1041215929;
+        genesis.nTime    = 1503406919;
+        genesis.nNonce   = 1834584;
 
         hashGenesisBlock = genesis.GetHash();
         //printf("%s\n", genesis.GetHash().ToString().c_str());
         //printf("%s\n", genesis.hashMerkleRoot.ToString().c_str());
-        assert(genesis.hashMerkleRoot == uint256("0x9dabd47e692ed615eae95da0c95f195a7dea9428bb9f9e0cd4c7d12533bf3667"));
-        if(hashGenesisBlock != uint256("0x000009a460ccc429ac6e53c91c6ed2d96697884b8b656a903042faff8971c5aa"))
-		MineGenesis(genesis);
-
-
-        vSeeds.push_back(CDNSSeedData("gpile.it", "gpile.it"));
-	vSeeds.push_back(CDNSSeedData("xcn.suprnova.cc", "xcn.suprnova.cc"));
-        vSeeds.push_back(CDNSSeedData("xcn-explorer.miners-zone.net", "xcn-explorer.miners-zone.net"));
-        vSeeds.push_back(CDNSSeedData("xcn-explorer.selektion21.de", "xcn-explorer.selektion21.de"));
+        assert(genesis.hashMerkleRoot == uint256("0x469880a3698175e889c502ba53091d1c2a2cdb716f4f75d24d9bb9782797a979"));
+        if(hashGenesisBlock != uint256("0x000000fb71ab34b45abb577ff3da985ad22039b3295b0b288cb8a5909cce18aa")){
+			MineGenesis(genesis);
+		}
+		
+		vFixedSeeds.clear();
+		vSeeds.clear();
+        //vSeeds.push_back(CDNSSeedData("gpile.it", "gpile.it"));
+	//vSeeds.push_back(CDNSSeedData("xcn.suprnova.cc", "xcn.suprnova.cc"));
+       // vSeeds.push_back(CDNSSeedData("xcn-explorer.miners-zone.net", "xcn-explorer.miners-zone.net"));
+       // vSeeds.push_back(CDNSSeedData("xcn-explorer.selektion21.de", "xcn-explorer.selektion21.de"));
 
         //sa ToDO: Review. The convert_to_container stuff was added as a quick fix to get it building in c++11. it should work
         // 	but not 100% certain and haven't tested
-        base58Prefixes[PUBKEY_ADDRESS] = (list_of(28)).convert_to_container<vector<unsigned char> >();
+        base58Prefixes[PUBKEY_ADDRESS] = (list_of(35)).convert_to_container<vector<unsigned char> >();
         base58Prefixes[SCRIPT_ADDRESS] = (list_of(5)).convert_to_container<vector<unsigned char> >();
         base58Prefixes[SECRET_KEY] =     (list_of(128)).convert_to_container<vector<unsigned char> >();
         base58Prefixes[EXT_PUBLIC_KEY] = (list_of(0x04)(0x88)(0xB2)(0x1E)).convert_to_container<vector<unsigned char> >();
@@ -167,21 +177,31 @@ public:
         strDataDir = "testnet3";
 
         // Modify the testnet genesis block so the timestamp is valid for a later start.
-        genesis.nTime = 1406495892;
-        genesis.nNonce = 9337333;
-	string msg = "foo";
-	genesis.vtx[0].msg = vector<char>(msg.begin(),msg.end());
+        genesis.nTime = 1503406920;
+        genesis.nNonce = 2061526;
+	int txType=0;
+	string feedback = "";
+	string url = "";
+	string token = "";
+	string tvalue = "";
+	genesis.vtx[0].txType = txType;
+	genesis.vtx[0].feedback = vector<char>(feedback.begin(),feedback.end());
+	genesis.vtx[0].url = vector<char>(url.begin(),url.end());
+	genesis.vtx[0].token = vector<char>(token.begin(),token.end());
+	genesis.vtx[0].tvalue = vector<char>(tvalue.begin(),tvalue.end());
+	
 	genesis.hashMerkleRoot = genesis.BuildMerkleTree();
         hashGenesisBlock = genesis.GetHash();
         //printf("%s\n", genesis.GetHash().ToString().c_str());
 //        assert(hashGenesisBlock == uint256("0xcc9c9f3b61e8422bc54b86925238262a2994f265aea14b5e10e3d2fd4cb413a8"));
 
-	if(hashGenesisBlock!= uint256("0000069d96f7f6135475139bc49f268997cb14850aae8feedf70047cfd89291a")){
+	if(hashGenesisBlock!= uint256("000003457acdf89ff36923e317b8ac79f81cf882b23eff22b617a09799fea3aa")){
 		MineGenesis(genesis);
 	}
 
         vFixedSeeds.clear();
-	vSeeds.push_back(CDNSSeedData("seed.cryptonite.info", "seed.cryptonite.info"));
+		vSeeds.clear();
+	//vSeeds.push_back(CDNSSeedData("seed.cryptonite.info", "seed.cryptonite.info"));
  
 	//sa ToDO: Review. The convert_to_container stuff was added as a quick fix to get it building in c++11. it should work
 	// 	but not 100% certain and haven't tested

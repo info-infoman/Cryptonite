@@ -1,2 +1,2 @@
 #!/bin/bash
-cp ~/oldwallet/* ~/.cryptonite/ -R
+cp ~/oldwallet/* ~/.feedbackcoin/ -R

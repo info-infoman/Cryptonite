@@ -140,7 +140,7 @@ Value getrawmempool(const Array& params, bool fHelp)
             "{                           (json object)\n"
             "  \"transactionid\" : {       (json object)\n"
             "    \"size\" : n,             (numeric) transaction size in bytes\n"
-            "    \"fee\" : n,              (ep) transaction fee in XCN\n"
+            "    \"fee\" : n,              (ep) transaction fee in FBC\n"
             "    \"time\" : n,             (numeric) local time transaction entered pool in seconds since 1 Jan 1970 GMT\n"
             "    \"height\" : n,           (numeric) block height when transaction entered pool\n"
             "    \"startingpriority\" : n, (numeric) priority when transaction entered pool\n"
@@ -392,7 +392,7 @@ Value gettxout(const Array& params, bool fHelp)
             "{\n"
             "  \"bestblock\" : \"hash\",    (string) the block hash\n"
             "  \"confirmations\" : n,       (numeric) The number of confirmations\n"
-            "  \"value\" : x.xxx,           (ep) The transaction value in XCN\n"
+            "  \"value\" : x.xxx,           (ep) The transaction value in FBC\n"
             "  \"pubkey\" : \"key\",        (string)public key hash output pays to\n"
             "  \"version\" : n,             (numeric) The version\n"
             "  \"coinbase\" : true|false    (boolean) Coinbase or not\n"
@@ -452,7 +452,7 @@ Value balancesat(const Array& params, bool fHelp)
             "\nReturns address state information as of a particular height (if available)\n"
             "\nArguments:\n"
             "2. height         (numeric, required) block height\n"
-            "1. \"address\"       (string, required) The cryptonite address to inspect\n"
+            "1. \"address\"       (string, required) The feedbackcoin address to inspect\n"
             "\nResult:\n"
             "{\n"
             "  },\n"
@@ -469,7 +469,7 @@ Value balancesat(const Array& params, bool fHelp)
  
     CBitcoinAddress address(params[1].get_str());
     if (!address.IsValid())
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid Cryptonite address");
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid FeedBackCoin address");
 
     int nHeight = params[0].get_int();
     Object ret;

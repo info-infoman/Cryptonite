@@ -272,6 +272,16 @@ void WalletView::usedSendingAddresses()
     dlg->show();
 }
 
+void WalletView::usedExchangeAddresses()
+{
+    if(!walletModel)
+        return;
+    AddressBookPage *dlg = new AddressBookPage(AddressBookPage::ForSelection, AddressBookPage::ExchangeTab, this);
+    dlg->setAttribute(Qt::WA_DeleteOnClose);
+    dlg->setModel(walletModel->getAddressTableModel());
+    dlg->show();
+}
+
 void WalletView::usedReceivingAddresses()
 {
     if(!walletModel)

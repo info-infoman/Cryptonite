@@ -22,6 +22,8 @@
 #include <boost/iostreams/concepts.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/shared_ptr.hpp>
+
+
 #include "json/json_spirit_writer_template.h"
 
 using namespace std;
@@ -147,6 +149,8 @@ Array RPCConvertValues(const std::string &strMethod, const std::vector<std::stri
     //if (strMethod == "move"                   && n > 2) ConvertTo<double>(params[2]);
     if (strMethod == "move"                   && n > 3) ConvertTo<boost::int64_t>(params[3]);
     if (strMethod == "sendfrom"               && n > 3) ConvertTo<boost::int64_t>(params[3]);
+	if (strMethod == "sendfrom"               && n > 4) ConvertTo<boost::uint64_t>(params[4]);
+	if (strMethod == "sendtoaddress"               && n > 2) ConvertTo<boost::uint64_t>(params[2]);
     if (strMethod == "listtransactions"       && n > 1) ConvertTo<boost::int64_t>(params[1]);
     if (strMethod == "listtransactions"       && n > 2) ConvertTo<boost::int64_t>(params[2]);
     if (strMethod == "listaccounts"           && n > 0) ConvertTo<boost::int64_t>(params[0]);
@@ -154,6 +158,7 @@ Array RPCConvertValues(const std::string &strMethod, const std::vector<std::stri
     if (strMethod == "listsinceblock"         && n > 1) ConvertTo<boost::int64_t>(params[1]);
     if (strMethod == "sendmany"               && n > 1) ConvertTo<Object>(params[1]);
     if (strMethod == "sendmany"               && n > 2) ConvertTo<boost::int64_t>(params[2]);
+	if (strMethod == "sendmany"               && n > 3) ConvertTo<boost::uint64_t>(params[3]);
     if (strMethod == "addmultisigaddress"     && n > 0) ConvertTo<boost::int64_t>(params[0]);
     if (strMethod == "addmultisigaddress"     && n > 1) ConvertTo<Array>(params[1]);
     if (strMethod == "createmultisig"         && n > 0) ConvertTo<boost::int64_t>(params[0]);
@@ -167,6 +172,7 @@ Array RPCConvertValues(const std::string &strMethod, const std::vector<std::stri
     if (strMethod == "createrawtransaction"   && n > 0) ConvertTo<Object>(params[0]);
     if (strMethod == "createrawtransaction"   && n > 1) ConvertTo<Object>(params[1]);
     if (strMethod == "createrawtransaction"   && n > 2) ConvertTo<boost::int64_t>(params[2]);
+	if (strMethod == "createrawtransaction"   && n > 5) ConvertTo<boost::int64_t>(params[5]);
     if (strMethod == "decoderawtransaction"   && n > 1) ConvertTo<Object>(params[1]);
     if (strMethod == "setuprawtransaction"    && n > 1) ConvertTo<Object>(params[1]);
     if (strMethod == "signrawtransaction"     && n > 1) ConvertTo<Object>(params[1], true);
@@ -181,6 +187,71 @@ Array RPCConvertValues(const std::string &strMethod, const std::vector<std::stri
     if (strMethod == "getrawmempool"          && n > 0) ConvertTo<bool>(params[0]);
 
     return params;
+}
+
+bool CheckSuperTransaction(const std::string &Protocol, const std::string &Host, const std::string &Patch, const std::string &token_, const std::string &tvalue_)
+{
+	/* #include <ctime>
+	time_t temp = clock(); */
+	bool fUseSSL=true;
+	if(Protocol=="http")
+		fUseSSL=false;
+	asio::io_service io_service;
+	ssl::context context(io_service, ssl::context::sslv23);
+	context.set_options(ssl::context::no_sslv2);
+	asio::ssl::stream<asio::ip::tcp::socket> sslStream(io_service, context);
+	SSLIOStreamDevice<asio::ip::tcp> d(sslStream, fUseSSL);
+	iostreams::stream< SSLIOStreamDevice<asio::ip::tcp> > stream(d);
+	
+	uint64_t uint_tvalue;
+	std::istringstream iss(tvalue_);
+	iss >> uint_tvalue;
+	
+	/* std::cout << "tvalue:"<< uint_tvalue << std::endl; */
+	bool fConnected = d.connect(Host, Protocol);
+	if(fConnected){
+		
+		int64_t DepthVerif=GetArg("-depthverif", 1000);
+		stream << "GET " << Patch << " HTTP/1.0\r\n";
+		stream << "Host: " << Host << "\r\n";
+		stream << "Accept: */*\r\n";
+		stream << "Connection: close\r\n\r\n";
+		stream.flush();
+		int nProto = 0;
+		int nStatus = ReadHTTPStatus(stream, nProto);
+		
+		if (nStatus >= 400 && nStatus != HTTP_BAD_REQUEST && nStatus != HTTP_NOT_FOUND && nStatus != HTTP_INTERNAL_SERVER_ERROR){
+				return false;
+		}
+		std::string strReply;
+		vector<char> vch(DepthVerif);
+		stream.read(&vch[0], DepthVerif);
+		strReply = string(vch.begin(), vch.end());
+		
+		std::size_t TokenEx = strReply.find(token_);
+		if (TokenEx==std::string::npos)
+			return false;
+		
+		if (uint_tvalue>0){
+			string strValue = strReply.substr((TokenEx+token_.size())+2, tvalue_.size());
+			if (strValue.empty()){
+				return false;
+			}
+			uint64_t uint_value;
+			std::istringstream iss(strValue);
+			iss >> uint_value;
+			if (uint_value >= uint_tvalue)
+				return true;
+			else
+				return false;
+		}else{
+			return true;
+		}
+	}else{
+		return false;
+	}
+	/* temp = clock()-temp;
+	std::cout << "STX: " << DepthVerif << " "<< float(temp)/CLOCKS_PER_SEC << " s." << std::endl; */
 }
 
 int CommandLineRPC(int argc, char *argv[])
@@ -256,7 +327,7 @@ std::string HelpMessageCli(bool mainProgram)
     {
         strUsage += _("Options:") + "\n";
         strUsage += "  -?                     " + _("This help message") + "\n";
-        strUsage += "  -conf=<file>           " + _("Specify configuration file (default: cryptonite.conf)") + "\n";
+        strUsage += "  -conf=<file>           " + _("Specify configuration file (default: feedbackcoin.conf)") + "\n";
         strUsage += "  -datadir=<dir>         " + _("Specify data directory") + "\n";
         strUsage += "  -testnet               " + _("Use the test network") + "\n";
         strUsage += "  -regtest               " + _("Enter regression test mode, which uses a special chain in which blocks can be "
@@ -274,7 +345,7 @@ std::string HelpMessageCli(bool mainProgram)
         strUsage += "  -rpcuser=<user>        " + _("Username for JSON-RPC connections") + "\n";
         strUsage += "  -rpcpassword=<pw>      " + _("Password for JSON-RPC connections") + "\n";
 
-        strUsage += "\n" + _("SSL options: (see the Cryptonite Wiki for SSL setup instructions)") + "\n";
+        strUsage += "\n" + _("SSL options: (see the FeedBackCoin Wiki for SSL setup instructions)") + "\n";
         strUsage += "  -rpcssl                " + _("Use OpenSSL (https) for JSON-RPC connections") + "\n";
     }
 

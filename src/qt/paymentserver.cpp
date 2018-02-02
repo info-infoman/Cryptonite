@@ -47,10 +47,10 @@
 using namespace boost;
 
 const int BITCOIN_IPC_CONNECT_TIMEOUT = 1000; // milliseconds
-const QString BITCOIN_IPC_PREFIX("cryptonite:");
-const char* BITCOIN_REQUEST_MIMETYPE = "application/cryptonite-paymentrequest";
-const char* BITCOIN_PAYMENTACK_MIMETYPE = "application/cryptonite-paymentack";
-const char* BITCOIN_PAYMENTACK_CONTENTTYPE = "application/cryptonite-payment";
+const QString BITCOIN_IPC_PREFIX("feedbackcoin:");
+const char* BITCOIN_REQUEST_MIMETYPE = "application/feedbackcoin-paymentrequest";
+const char* BITCOIN_PAYMENTACK_MIMETYPE = "application/feedbackcoin-paymentack";
+const char* BITCOIN_PAYMENTACK_CONTENTTYPE = "application/feedbackcoin-payment";
 
 X509_STORE* PaymentServer::certStore = NULL;
 void PaymentServer::freeCertStore()
@@ -69,7 +69,7 @@ void PaymentServer::freeCertStore()
 //
 static QString ipcServerName()
 {
-    QString name("CryptoniteQt");
+    QString name("FeedBackCoinQt");
 
     // Append a simple hash of the datadir
     // Note that GetDataDir(true) returns a different path
@@ -290,7 +290,7 @@ PaymentServer::PaymentServer(QObject* parent, bool startLocalServer) :
         if (!uriServer->listen(name)) {
             // constructor is called early in init, so don't use "emit message()" here
             QMessageBox::critical(0, tr("Payment request error"),
-                tr("Cannot start cryptonite: click-to-pay handler"));
+                tr("Cannot start feedbackcoin: click-to-pay handler"));
         }
         else {
             connect(uriServer, SIGNAL(newConnection()), this, SLOT(handleURIConnection()));

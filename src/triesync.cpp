@@ -358,7 +358,13 @@ void TrieSync::ApplyTransactions(map<uint160, AccountData> &data, CBlock &block)
   	    ad.SetKey(txout.pubKey);	
 	    //No set age on output
 //	    ad.SetAge(block.nHeight);
-	    ad.SetBalance(ad.Balance()+txout.nValue);
+		if(tx.txType == 1 & !tx.IsCoinBase()){
+			ad.SetBalance(ad.Balance()-txout.nValue);
+			 LogPrintf("minus\n");
+		}else{
+			ad.SetBalance(ad.Balance()+txout.nValue);
+			LogPrintf("plus\n");
+		}
 	    data[txout.pubKey] = ad;
 	}
     }

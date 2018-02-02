@@ -190,15 +190,26 @@ QString TransactionDesc::toHTML(CWallet *wallet, CWalletTx &wtx, int vout, int u
         //
         // Message
         //
-        strHTML += "<br><b>" + tr("Message") + ":</b><br>" + GUIUtil::HtmlEscape(string(wtx.msg.begin(),wtx.msg.end()), true) + "<br>";
-
+		if (wtx.txType==0){
+			strHTML += "<br><b>" + tr("Type") + ":</b>Positive<br>";
+		}
+		if (wtx.txType==1){
+			strHTML += "<br><b>" + tr("Type") + ":</b>Negative";
+			strHTML += "<br><b>" + tr("Feed back") + ":</b>" + GUIUtil::HtmlEscape(string(wtx.feedback.begin(),wtx.feedback.end()), true) + "<br>";
+		}
+		if (wtx.txType==2){
+			strHTML += "<br><b>" + tr("Type") + ":</b>Exchange";
+			strHTML += "<br><b>" + tr("URL-point") + ":</b>" + GUIUtil::HtmlEscape(string(wtx.url.begin(),wtx.url.end()), true) + "";
+			strHTML += "<br><b>" + tr("Token") + ":</b>" + GUIUtil::HtmlEscape(string(wtx.token.begin(),wtx.token.end()), true) + "";
+			strHTML += "<br><b>" + tr("Token value") + ":</b>" + GUIUtil::HtmlEscape(string(wtx.tvalue.begin(),wtx.tvalue.end()), true) + "<br>";
+		}
         strHTML += "<b>" + tr("Transaction ID") + ":</b> " + QString::fromStdString(wtx.GetTxID().ToString()) + "<br>";
 #if 0 //TODO: wtf is this stuff?
         // Message from normal bitcoin:URI (bitcoin:123...?message=example)
         foreach (const PAIRTYPE(string, string)& r, wtx.vOrderForm)
             if (r.first == "Message")
                 strHTML += "<br><b>" + tr("Message") + ":</b><br>" + GUIUtil::HtmlEscape(r.second, true) + "<br>";
-
+		
         //
         // PaymentRequest info:
         //

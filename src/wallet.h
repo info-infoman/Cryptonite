@@ -26,6 +26,7 @@
 
 // Settings
 extern int64_t nTransactionFee;
+extern int64_t nTransactionFFee;
 extern bool bSpendZeroConfChange;
 
 // -paytxfee will warn if called with a higher fee than this amount (in satoshis) per KB
@@ -254,7 +255,9 @@ public:
 
     std::set< std::set<CTxDestination> > GetAddressGroupings();
     std::map<CTxDestination, uint64_t> GetAddressBalances();
+	int64_t GetAddressBalance(const CTxDestination &address);
 
+	
     std::set<CTxDestination> GetAccountAddresses(std::string strAccount) const;
 
     bool IsMine(const CTxIn& txin) const
@@ -317,6 +320,8 @@ public:
     DBErrors ZapWalletTx();
 
     bool SetAddressBook(const CTxDestination& address, const std::string& strName, const std::string& purpose);
+	
+	void GetAccountForTx(const CTxIn& txin, const CTxOut& txout, const CTransaction& tx);
 
     bool DelAddressBook(const CTxDestination& address);
 
@@ -355,7 +360,8 @@ public:
     boost::signals2::signal<void (CWallet *wallet, const CTxDestination
             &address, const std::string &label, bool isMine,
             const std::string &purpose,
-            ChangeType status)> NotifyAddressBookChanged;
+            ChangeType status,
+			uint64_t Balance)> NotifyAddressBookChanged;
 
     /** Wallet transaction added, removed or updated.
      * @note called with lock cs_wallet held.

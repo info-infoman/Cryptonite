@@ -60,6 +60,19 @@ void SendCoinsEntry::on_addressBookButton_clicked()
     }
 }
 
+void SendCoinsEntry::on_ExchangeBookButton_clicked()
+{
+    if(!model)
+        return;
+    AddressBookPage dlg(AddressBookPage::ForSelection, AddressBookPage::ExchangeTab, this);
+    dlg.setModel(model->getAddressTableModel());
+    if(dlg.exec())
+    {
+        ui->payTo->setText(dlg.getReturnValue());
+        ui->payAmount->setFocus();
+    }
+}
+
 void SendCoinsEntry::on_payTo_textChanged(const QString &address)
 {
     updateLabel(address);
@@ -156,7 +169,8 @@ QWidget *SendCoinsEntry::setupTabChain(QWidget *prev)
     QWidget::setTabOrder(ui->payTo, ui->addAsLabel);
     QWidget *w = ui->payAmount->setupTabChain(ui->addAsLabel);
     QWidget::setTabOrder(w, ui->addressBookButton);
-    QWidget::setTabOrder(ui->addressBookButton, ui->pasteButton);
+	QWidget::setTabOrder(ui->addressBookButton, ui->ExchangeBookButton);
+    QWidget::setTabOrder(ui->ExchangeBookButton, ui->pasteButton);
     QWidget::setTabOrder(ui->pasteButton, ui->deleteButton);
     return ui->deleteButton;
 }
@@ -226,9 +240,14 @@ bool SendCoinsEntry::updateLabel(const QString &address)
 
     // Fill in label from address book, if address has an associated label
     QString associatedLabel = model->getAddressTableModel()->labelForAddress(address);
+	// QString associatedType = model->getAddressTableModel()->TypeForAddress(address);
+	QString Exchange="Exchange";
     if(!associatedLabel.isEmpty())
     {
         ui->addAsLabel->setText(associatedLabel);
+		// if (associatedType==Exchange){
+			// Ui::SendCoinsDialog->msgLabel->setText(associatedType);
+		// }
         return true;
     }
 

@@ -31,12 +31,18 @@ EditAddressDialog::EditAddressDialog(Mode mode, QWidget *parent) :
     case NewSendingAddress:
         setWindowTitle(tr("New sending address"));
         break;
+	case NewExchangeAddress:
+        setWindowTitle(tr("New Exchange address"));
+        break;
     case EditReceivingAddress:
         setWindowTitle(tr("Edit receiving address"));
         ui->addressEdit->setEnabled(false);
         break;
     case EditSendingAddress:
         setWindowTitle(tr("Edit sending address"));
+        break;
+	case EditExchangeAddress:
+        setWindowTitle(tr("Edit Exchange address"));
         break;
     }
 
@@ -73,13 +79,15 @@ bool EditAddressDialog::saveCurrentRow()
     switch(mode)
     {
     case NewReceivingAddress:
+	case NewExchangeAddress:
     case NewSendingAddress:
         address = model->addRow(
-                mode == NewSendingAddress ? AddressTableModel::Send : AddressTableModel::Receive,
+                mode == NewSendingAddress ? AddressTableModel::Send : (mode == NewReceivingAddress ? AddressTableModel::Receive : AddressTableModel::Exchange),
                 ui->labelEdit->text(),
                 ui->addressEdit->text());
         break;
     case EditReceivingAddress:
+	case EditExchangeAddress:
     case EditSendingAddress:
         if(mapper->submit())
         {
@@ -107,7 +115,7 @@ void EditAddressDialog::accept()
             break;
         case AddressTableModel::INVALID_ADDRESS:
             QMessageBox::warning(this, windowTitle(),
-                tr("The entered address \"%1\" is not a valid Cryptonite address.").arg(ui->addressEdit->text()),
+                tr("The entered address \"%1\" is not a valid FeedBackCoin address.").arg(ui->addressEdit->text()),
                 QMessageBox::Ok, QMessageBox::Ok);
             break;
         case AddressTableModel::DUPLICATE_ADDRESS:

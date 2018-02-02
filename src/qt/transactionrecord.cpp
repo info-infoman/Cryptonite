@@ -37,6 +37,14 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
     int64_t nNet = nCredit - nDebit;
     uint256 hash = wtx.GetTxID();
     std::map<std::string, std::string> mapValue = wtx.mapValue;
+	
+	bool fAllFromMe = true;
+        BOOST_FOREACH(const CTxIn& txin, wtx.vin)
+            fAllFromMe = fAllFromMe && wallet->IsMine(txin);
+
+    bool fAllToMe = true;
+        BOOST_FOREACH(const CTxOut& txout, wtx.vout)
+            fAllToMe = fAllToMe && wallet->IsMine(txout);
 
     if (nNet > 0 || wtx.IsCoinBase())
     {
@@ -68,26 +76,23 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                     // Generated
                     sub.type = TransactionRecord::Generated;
                 }
-
+				
+				//Exchange
+				if (wtx.txType==2 && fAllToMe && !fAllFromMe){		
+					sub.type = TransactionRecord::Exchange;
+				}
                 parts.append(sub);
             }
         }
     }
     else
     {
-        bool fAllFromMe = true;
-        BOOST_FOREACH(const CTxIn& txin, wtx.vin)
-            fAllFromMe = fAllFromMe && wallet->IsMine(txin);
-
-        bool fAllToMe = true;
-        BOOST_FOREACH(const CTxOut& txout, wtx.vout)
-            fAllToMe = fAllToMe && wallet->IsMine(txout);
-
-	if(wtx.fSetLimit){
-            // Payment to self
-            parts.append(TransactionRecord(hash, nTime, TransactionRecord::SetLimit, "",
-                            wtx.nLimitValue, 0));
-	}
+        
+		if(wtx.fSetLimit){
+				// Payment to self
+				parts.append(TransactionRecord(hash, nTime, TransactionRecord::SetLimit, "",
+								wtx.nLimitValue, 0));
+		}
         else if (fAllFromMe && fAllToMe)
         {
             // Payment to self

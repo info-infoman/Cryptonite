@@ -86,13 +86,13 @@ bool AppInit(int argc, char* argv[])
         if (mapArgs.count("-?") || mapArgs.count("--help"))
         {
             // First part of help message is specific to bitcoind / RPC client
-            std::string strUsage = _("Cryptonite Core Daemon") + " " + _("version") + " " + FormatFullVersion() + "\n\n" +
+            std::string strUsage = _("FeedBackCoin Core Daemon") + " " + _("version") + " " + FormatFullVersion() + "\n\n" +
                 _("Usage:") + "\n" +
-                  "  cryptonited [options]                     " + _("Start Cryptonite Core Daemon") + "\n" +
-                _("Usage (deprecated, use cryptonited-cli):") + "\n" +
-                  "  cryptonited [options] <command> [params]  " + _("Send command to Cryptonite Core") + "\n" +
-                  "  cryptonited [options] help                " + _("List commands") + "\n" +
-                  "  cryptonited [options] help <command>      " + _("Get help for a command") + "\n";
+                  "  feedbackcoind [options]                     " + _("Start FeedBackCoin Core Daemon") + "\n" +
+                _("Usage (deprecated, use feedbackcoind-cli):") + "\n" +
+                  "  feedbackcoind [options] <command> [params]  " + _("Send command to FeedBackCoin Core") + "\n" +
+                  "  feedbackcoind [options] help                " + _("List commands") + "\n" +
+                  "  feedbackcoind [options] help <command>      " + _("Get help for a command") + "\n";
 
             strUsage += "\n" + HelpMessage(HMM_BITCOIND);
             strUsage += "\n" + HelpMessageCli(false);
@@ -104,7 +104,7 @@ bool AppInit(int argc, char* argv[])
         // Command-line RPC
         bool fCommandLine = false;
         for (int i = 1; i < argc; i++)
-            if (!IsSwitchChar(argv[i][0]) && !boost::algorithm::istarts_with(argv[i], "cryptonite:"))
+            if (!IsSwitchChar(argv[i][0]) && !boost::algorithm::istarts_with(argv[i], "feedbackcoin:"))
                 fCommandLine = true;
 
         if (fCommandLine)
@@ -116,7 +116,7 @@ bool AppInit(int argc, char* argv[])
         fDaemon = GetBoolArg("-daemon", false);
         if (fDaemon)
         {
-            fprintf(stdout, "Cryptonite server starting\n");
+            fprintf(stdout, "FeedBackCoin server starting\n");
 
             // Daemonize
             pid_t pid = fork();

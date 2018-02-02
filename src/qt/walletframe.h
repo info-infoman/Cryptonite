@@ -75,6 +75,8 @@ public slots:
     void usedSendingAddresses();
     /** Show used receiving addresses */
     void usedReceivingAddresses();
+	/** Show used Exchange addresses */
+    void usedExchangeAddresses();
 };
 
 #endif // WALLETFRAME_H

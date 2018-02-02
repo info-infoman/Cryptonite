@@ -79,9 +79,21 @@ public:
         ::WriteCompactSize(s, nOutputs);
         for (unsigned int nOutput = 0; nOutput < nOutputs; nOutput++)
              SerializeOutput(s, nOutput, nType, nVersion);
-	// Serialize msg
-	::WriteCompactSize(s, txTo.msg.size());
-	::Serialize(s, txTo.msg, nType, nVersion);
+	// Serialize feedback
+	::WriteCompactSize(s, txTo.feedback.size());
+	::Serialize(s, txTo.feedback, nType, nVersion);
+	// Serialize url
+	::WriteCompactSize(s, txTo.url.size());
+	::Serialize(s, txTo.url, nType, nVersion);
+	// Serialize token
+	::WriteCompactSize(s, txTo.token.size());
+	::Serialize(s, txTo.token, nType, nVersion);
+	// Serialize tvalue
+	::WriteCompactSize(s, txTo.tvalue.size());
+	::Serialize(s, txTo.tvalue, nType, nVersion);
+		
+		// Serialie txType
+        ::Serialize(s, txTo.txType, nType, nVersion);
         // Serialie nLockTime
         ::Serialize(s, txTo.nLockHeight, nType, nVersion);
     }

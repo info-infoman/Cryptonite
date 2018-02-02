@@ -20,7 +20,7 @@
       <string notr="true">QLabel { font-style:italic; }</string>
      </property>
      <property name="text">
-      <string>Welcome to Cryptonite.</string>
+      <string>Welcome to FeedBackCoin.</string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>
@@ -46,7 +46,7 @@
    <item>
     <widget class="QLabel" name="label_4">
      <property name="text">
-      <string>As this is the first time the program is launched, you can choose where Cryptonite will store its data.</string>
+      <string>As this is the first time the program is launched, you can choose where FeedBackCoin will store its data.</string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>
@@ -56,7 +56,7 @@
    <item>
     <widget class="QLabel" name="sizeWarningLabel">
      <property name="text">
-      <string>Cryptonite will download and store a copy of the Cryptonite block chain. A small amount of data will be stored in this directory, and it may grow over time. The wallet will also be stored in this directory.</string>
+      <string>FeedBackCoin will download and store a copy of the FeedBackCoin block chain. A small amount of data will be stored in this directory, and it may grow over time. The wallet will also be stored in this directory.</string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>

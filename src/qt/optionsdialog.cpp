@@ -99,6 +99,8 @@ OptionsDialog::OptionsDialog(QWidget *parent) :
     ui->unit->setModel(new BitcoinUnits(this));
     ui->transactionFee->setSingleStep(CTransaction::nMinTxFee);
     ui->transactionFee->setValue(nTransactionFee);
+	ui->transactionFFee->setSingleStep(CTransaction::nMinTxFee);
+    ui->transactionFFee->setValue(nTransactionFFee);
 
     /* Widget-to-option mapper */
     mapper = new MonitoredDataMapper(this);
@@ -158,6 +160,7 @@ void OptionsDialog::setMapper()
 
     /* Wallet */
     mapper->addMapping(ui->transactionFee, OptionsModel::Fee);
+	mapper->addMapping(ui->transactionFFee, OptionsModel::FFee);
 
     /* Network */
     mapper->addMapping(ui->mapPortUpnp, OptionsModel::MapPortUPnP);
@@ -253,6 +256,7 @@ void OptionsDialog::updateDisplayUnit()
     {
         /* Update transactionFee with the current unit */
         ui->transactionFee->setDisplayUnit(model->getDisplayUnit());
+		ui->transactionFFee->setDisplayUnit(model->getDisplayUnit());
     }
 }
 

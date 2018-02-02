@@ -196,7 +196,11 @@ void TxToJSON(const CTransaction& tx, const uint256 hashBlock, Object& entry, ma
     entry.push_back(Pair("txid", tx.GetTxID().GetHex()));
     entry.push_back(Pair("version", tx.nVersion));
     entry.push_back(Pair("lockheight", (boost::uint64_t)tx.nLockHeight));
-    entry.push_back(Pair("msg",string(tx.msg.begin(),tx.msg.end())));
+	entry.push_back(Pair("txType", (boost::uint64_t)tx.txType));
+	entry.push_back(Pair("feedback",string(tx.feedback.begin(),tx.feedback.end())));
+    entry.push_back(Pair("url",string(tx.url.begin(),tx.url.end())));
+	entry.push_back(Pair("token",string(tx.token.begin(),tx.token.end())));
+	entry.push_back(Pair("tvalue",string(tx.tvalue.begin(),tx.tvalue.end())));
     Array vin;
     for(unsigned i=0; i < tx.vin.size(); i++)
     {
@@ -291,7 +295,7 @@ Value getrawtransaction(const Array& params, bool fHelp)
             "     {\n"
 	    "       \"coinbase\" : bool,   (boolean) if input is coinbase account\n"
             "       \"pubkey\": \"key\",   (string) The public key hash of the input\n"
-	    "	    \"address\" : \"addr\",(string) Cryptonite address representation of public key hash\n"
+	    "	    \"address\" : \"addr\",(string) feedbackcoin address representation of public key hash\n"
             "       \"scriptSig\": {       (json object) The script\n"
             "         \"hex\": \"hex\",    (string) hex\n"
             "       },\n"
@@ -301,10 +305,10 @@ Value getrawtransaction(const Array& params, bool fHelp)
             "  ],\n"
             "  \"vout\" : [                (array of json objects)\n"
             "     {\n"
-            "       \"value\" : x.xxx,     (ep) The value in XCN\n"
+            "       \"value\" : x.xxx,     (ep) The value in FBC\n"
             "       \"n\" : n,             (numeric) index\n"
             "       \"pubkey\": \"key\",   (string) The public key hash of the input\n"
-	    "	    \"address\" : \"addr\",(string) Cryptonite address representation of public key hash\n"
+	    "	    \"address\" : \"addr\",(string) feedbackcoin address representation of public key hash\n"
             "     }\n"
             "     ,...\n"
             "  ],\n"
@@ -356,18 +360,18 @@ Value listbalances(const Array& params, bool fHelp)
             "{address, ours, account, balance}\n"
             "\nArguments:\n"
             "1. minconf          (numeric, optional, default=1) The minimum confirmationsi to filter\n"
-            "2. \"addresses\"    (string) A json array of cryptonite addresses to filter\n"
+            "2. \"addresses\"    (string) A json array of feedbackcoin addresses to filter\n"
             "    [\n"
-            "      \"address\"   (string) cryptonite address\n"
+            "      \"address\"   (string) feedbackcoin address\n"
             "      ,...\n"
             "    ]\n"
             "\nResult\n"
             "[                   (array of json object)\n"
             "  {\n"
-            "    \"address\" : \"address\",  (string) the cryptonite address\n"
+            "    \"address\" : \"address\",  (string) the feedbackcoin address\n"
 	    "    \"ours\"    : true/false,   (bool) is the account belongs to the local wallet\n"
             "    \"account\" : \"account\",  (string,null) The associated account, or \"\" for the default account\n"
-            "    \"balance\" : x.xxx,        (ep) the account balance in XCN\n"
+            "    \"balance\" : x.xxx,        (ep) the account balance in FBC\n"
             "  }\n"
             "  ,...\n"
             "]\n"
@@ -398,7 +402,7 @@ Value listbalances(const Array& params, bool fHelp)
         {
             CBitcoinAddress address(input.get_str());
             if (!address.IsValid())
-                throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, string("Invalid cryptonite address: ")+input.get_str());
+                throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, string("Invalid feedbackcoin address: ")+input.get_str());
            vecAddress.push_back(address);
 	   CKeyID foo;
 	   address.GetKeyID(foo);
@@ -443,7 +447,7 @@ Value listbalances(const Array& params, bool fHelp)
 //sa ToDo: Update documentation
 Value createrawtransaction(const Array& params, bool fHelp)
 {
-    if (fHelp || (params.size() < 2 && params.size() > 4 ))
+    if (fHelp || (params.size() < 2 && params.size() > 7 ))
         throw runtime_error(
             "createrawtransaction [{\"txid\":\"id\",\"vout\":n},...] {\"address\":amount,...}\n"
             "\nCreate a transaction spending the given inputs and sending to the given addresses.\n"
@@ -454,16 +458,19 @@ Value createrawtransaction(const Array& params, bool fHelp)
             "\nArguments:\n"
             "1. \"inputs\"        (string, required) a json object with addresses as keys and amounts as values\n"
             "    {\n"
-            "      \"address\": x.xxx   (ep, required) The key is the cryptonite address, the value is the XCN amount\n"
+            "      \"address\": x.xxx   (ep, required) The key is the feedbackcoin address, the value is the FBC amount\n"
             "      ,...\n"
             "    }\n"
             "2. \"outputs\"           (string, required) a json object with addresses as keys and amounts as values\n"
             "    {\n"
-            "      \"address\": x.xxx   (ep, required) The key is the cryptonite address, the value is the XCN amount\n"
+            "      \"address\": x.xxx   (ep, required) The key is the feedbackcoin address, the value is the FBC amount\n"
             "      ,...\n"
             "    }\n"
-	    "3. \"lockheight\"    (numeric, optional) specific lockheight where transaction becomes valid. default is current chain height\n"
-	    "4. \"msg\"		  (string, optional) message to include in transaction\n"
+			"3. \"txType\"     (int) A type of transaction 0-positive, 1-negative, 2-supertransaction. \n"
+			"4. \"feedback\"     (string, optional) A feedback for negative transaction. \n"
+            "5. \"url\"     (string) URL-point for supertransaction (exchange). \n"
+			"6. \"token\"     (string) A token used if it supertransaction. \n"
+			"7. \"tvalue\"     (int, optional) A token value if supertransaction check token>=int. \n"
 
             "\nResult:\n"
             "\"transaction\"            (string) hex string of the transaction\n"
@@ -485,7 +492,7 @@ Value createrawtransaction(const Array& params, bool fHelp)
     {
     	CBitcoinAddress address(input.name_);
     	if (!address.IsValid())
-    		throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, string("Invalid Cryptonite address: ")+input.name_);
+    		throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, string("Invalid feedbackcoin address: ")+input.name_);
 
 		if (setInAddress.count(address))
 			throw JSONRPCError(RPC_INVALID_PARAMETER, string("Invalid parameter, duplicated address: ")+input.name_);
@@ -506,7 +513,7 @@ Value createrawtransaction(const Array& params, bool fHelp)
     {
         CBitcoinAddress address(output.name_);
         if (!address.IsValid())
-            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, string("Invalid Cryptonite address: ")+output.name_);
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, string("Invalid feedbackcoin address: ")+output.name_);
 
         if (setOutAddress.count(address))
             throw JSONRPCError(RPC_INVALID_PARAMETER, string("Invalid parameter, duplicated address: ")+output.name_);
@@ -522,17 +529,32 @@ Value createrawtransaction(const Array& params, bool fHelp)
         rawTx.vout.push_back(out);
     }
 
-    if(params.size() > 2 && params[2].get_int() > 0){
-	rawTx.nLockHeight = params[2].get_int();
-    }else{
+    
 	rawTx.nLockHeight = chainActive.Height();
+    
+	if (params.size() < 2 || (params.size() > 2 && (params[2].get_int()<0 || params[2].get_int()>2)))
+        throw JSONRPCError(RPC_WALLET_ERROR, "Invalid transaction type");
+	if (params[2].get_int()==0 && ((params[3].type() != null_type && !params[3].get_str().empty()) || (params[4].type() != null_type && !params[4].get_str().empty()) || (params[5].type() != null_type && !params[5].get_str().empty())||(params[6].type() != null_type && !params[6].get_str().empty())))
+        throw JSONRPCError(RPC_WALLET_ERROR, "Invalid positive transaction params");
+	if (params[2].get_int()==1 && ((params[3].type() == null_type && params[3].get_str().empty()) || ((params[4].type() != null_type && !params[4].get_str().empty()) || (params[5].type() != null_type && !params[5].get_str().empty())||(params[6].type() != null_type && !params[6].get_str().empty()))))
+        throw JSONRPCError(RPC_WALLET_ERROR, "Invalid negative transaction params");
+	if (params[2].get_int()==2 && ((params[4].type() == null_type && params[4].get_str().empty()) || (params[5].type() == null_type && params[5].get_str().empty())||(params[6].type() == null_type && params[6].get_str().empty()) || (params[3].type() != null_type && !params[3].get_str().empty())))
+        throw JSONRPCError(RPC_WALLET_ERROR, "Invalid supertransaction params");
+	rawTx.txType=params[2].get_int();
+	
+	if (rawTx.txType==1){
+	string feedback = params[3].get_str();
+        rawTx.feedback = vector<char>(feedback.begin(), feedback.end());
     }
-
-    if(params.size() > 3){
-	string msg = params[3].get_str();
-        rawTx.msg = vector<char>(msg.begin(),msg.end());
+    if (rawTx.txType==2){
+	string url= params[4].get_str();
+    rawTx.url = vector<char>(url.begin(), url.end());
+	string token = params[5].get_str();
+    rawTx.token = vector<char>(token.begin(), token.end());
+	string tvalue = params[6].get_str();
+    rawTx.tvalue = vector<char>(tvalue.begin(), tvalue.end());
     }
-
+	
     CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
     ss << rawTx;
     return HexStr(ss.begin(), ss.end());
@@ -555,9 +577,9 @@ Value setuprawtransaction(const Array& params, bool fHelp)
             "      \"multisigsetup\":  (string, required) The value is an array of multisig parameters\n"
             "      [\n"
             "        1. nrequired      (numeric, required) The number of required signatures out of the n keys or addresses.\n"
-            "        2. \"keys\"       (string, required) A json array of keys which are cryptonite addresses or hex-encoded public keys\n"
+            "        2. \"keys\"       (string, required) A json array of keys which are feedbackcoin addresses or hex-encoded public keys\n"
             "        [\n"
-            "          \"key\"    (string) cryptonite address or hex-encoded public key\n"
+            "          \"key\"    (string) feedbackcoin address or hex-encoded public key\n"
             "          ,...\n"
             "        ]\n"
             "      ]\n"
@@ -657,7 +679,7 @@ Value decoderawtransaction(const Array& params, bool fHelp)
             "     {\n"
 	    "       \"coinbase\" : bool,   (boolean) if input is coinbase account\n"
             "       \"pubkey\": \"key\",   (string) The public key hash of the input\n"
-	    "	    \"address\" : \"addr\",(string) Cryptonite address representation of public key hash\n"
+	    "	    \"address\" : \"addr\",(string) feedbackcoin address representation of public key hash\n"
             "       \"scriptSig\": {       (json object) The script\n"
             "         \"hex\": \"hex\",    (string) hex\n"
             "       },\n"
@@ -667,10 +689,10 @@ Value decoderawtransaction(const Array& params, bool fHelp)
             "  ],\n"
             "  \"vout\" : [                (array of json objects)\n"
             "     {\n"
-            "       \"value\" : x.xxx,     (ep) The value in XCN\n"
+            "       \"value\" : x.xxx,     (ep) The value in FBC\n"
             "       \"n\" : n,             (numeric) index\n"
             "       \"pubkey\": \"key\",   (string) The public key hash of the input\n"
-	    "	    \"address\" : \"addr\",(string) Cryptonite address representation of public key hash\n"
+	    "	    \"address\" : \"addr\",(string) feedbackcoin address representation of public key hash\n"
             "     }\n"
             "     ,...\n"
             "  ],\n"

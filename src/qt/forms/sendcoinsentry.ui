@@ -71,6 +71,23 @@
          <string>Alt+A</string>
         </property>
        </widget>
+	   </item>
+	   <item>
+	   <widget class="QToolButton" name="ExchangeBookButton">
+        <property name="toolTip">
+         <string>Choose Exchange address</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../bitcoin.qrc">
+          <normaloff>:/icons/exchange</normaloff>:/icons/exchange</iconset>
+        </property>
+        <property name="shortcut">
+         <string>Alt+E</string>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QToolButton" name="pasteButton">
@@ -1200,6 +1217,7 @@
  <tabstops>
   <tabstop>payTo</tabstop>
   <tabstop>addressBookButton</tabstop>
+  <tabstop>ExchangeBookButton</tabstop>
   <tabstop>pasteButton</tabstop>
   <tabstop>deleteButton</tabstop>
   <tabstop>addAsLabel</tabstop>

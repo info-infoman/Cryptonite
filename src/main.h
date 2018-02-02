@@ -42,7 +42,7 @@ extern CBlockCache blockCache;
 /** The maximum allowed size for a serialized block, in bytes (network rule) */
 static const unsigned int MAX_BLOCK_SIZE = 1000000;
 /** The maximum allowed transaction messge */
-static const unsigned int MAX_MSG_SIZE = 64;
+static const unsigned int MAX_MSG_SIZE = 255;
 /** Default for -blockmaxsize and -blockminsize, which control the range of sizes the mining code will create **/
 static const unsigned int DEFAULT_BLOCK_MAX_SIZE = 750000;
 static const unsigned int DEFAULT_BLOCK_MIN_SIZE = 0;

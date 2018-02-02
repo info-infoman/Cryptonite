@@ -42,8 +42,8 @@ static const int MAX_PAYMENT_REQUEST_SIZE = 50000; // bytes
 #define SPINNER_FRAMES 35
 
 #define QAPP_ORG_NAME "Mini-Blockchain"
-#define QAPP_ORG_DOMAIN "cryptonite.info"
-#define QAPP_APP_NAME_DEFAULT "Cryptonite-Qt"
-#define QAPP_APP_NAME_TESTNET "Cryptonite-Qt-testnet"
+#define QAPP_ORG_DOMAIN "feedbackcoin.info"
+#define QAPP_APP_NAME_DEFAULT "feedbackcoin-Qt"
+#define QAPP_APP_NAME_TESTNET "feedbackcoin-Qt-testnet"
 
 #endif // GUICONSTANTS_H

@@ -3,21 +3,21 @@ include Makefile.include
 AM_CPPFLAGS += -I$(builddir) -fpermissive -ffloat-store -std=c++11 -D__STDC_LIMIT_MACROS -D__USE_MINGW_ANSI_STDIO
 
 noinst_LIBRARIES = \
-  libcryptonite_server.a \
-  libcryptonite_common.a \
-  libcryptonite_cli.a
+  libfeedbackcoin_server.a \
+  libfeedbackcoin_common.a \
+  libfeedbackcoin_cli.a
 if ENABLE_WALLET
-noinst_LIBRARIES += libcryptonite_wallet.a
+noinst_LIBRARIES += libfeedbackcoin_wallet.a
 endif
 
 bin_PROGRAMS =
 
 if BUILD_BITCOIND
-  bin_PROGRAMS += cryptonited
+  bin_PROGRAMS += feedbackcoind
 endif
 
 if BUILD_BITCOIN_CLI
-  bin_PROGRAMS += cryptonite-cli
+  bin_PROGRAMS += feedbackcoin-cli
 endif
 
 SUBDIRS = . $(BUILD_QT) $(BUILD_TEST)
@@ -89,7 +89,7 @@ obj/build.h: FORCE
 	  $(abs_top_srcdir)
 version.o: obj/build.h
 
-libcryptonite_server_a_SOURCES = \
+libfeedbackcoin_server_a_SOURCES = \
   addrman.cpp \
   alert.cpp \
   bloom.cpp \
@@ -116,7 +116,7 @@ libcryptonite_server_a_SOURCES = \
   $(JSON_H) \
   $(BITCOIN_CORE_H)
 
-libcryptonite_wallet_a_SOURCES = \
+libfeedbackcoin_wallet_a_SOURCES = \
   db.cpp \
   crypter.cpp \
   rpcdump.cpp \
@@ -125,7 +125,7 @@ libcryptonite_wallet_a_SOURCES = \
   walletdb.cpp \
   $(BITCOIN_CORE_H)
 
-libcryptonite_common_a_SOURCES = \
+libfeedbackcoin_common_a_SOURCES = \
   allocators.cpp \
   chainparams.cpp \
   trie.cpp \
@@ -150,47 +150,47 @@ libcryptonite_common_a_SOURCES = \
   hash/keccak.cpp \
   $(BITCOIN_CORE_H)
 
-libcryptonite_cli_a_SOURCES = \
+libfeedbackcoin_cli_a_SOURCES = \
   rpcclient.cpp \
   $(BITCOIN_CORE_H)
 
-nodist_libcryptonite_common_a_SOURCES = $(top_srcdir)/src/obj/build.h
+nodist_libfeedbackcoin_common_a_SOURCES = $(top_srcdir)/src/obj/build.h
 #
 
-# cryptonited binary #
-cryptonited_LDADD = \
-  libcryptonite_server.a \
-  libcryptonite_cli.a \
-  libcryptonite_common.a \
+# feedbackcoind binary #
+feedbackcoind_LDADD = \
+  libfeedbackcoin_server.a \
+  libfeedbackcoin_cli.a \
+  libfeedbackcoin_common.a \
   $(LIBLEVELDB) \
   $(LIBMEMENV) \
   -lpthread
 
 if ENABLE_WALLET
-cryptonited_LDADD += libcryptonite_wallet.a
+feedbackcoind_LDADD += libfeedbackcoin_wallet.a
 endif
-cryptonited_SOURCES = cryptonited.cpp
+feedbackcoind_SOURCES = feedbackcoind.cpp
 #
 
 if TARGET_WINDOWS
-cryptonited_SOURCES += cryptonited-res.rc
+feedbackcoind_SOURCES += feedbackcoind-res.rc
 endif
 
 AM_CPPFLAGS += $(BDB_CPPFLAGS)
-cryptonited_LDADD += $(BOOST_LIBS) $(BDB_LIBS) -lgmp
+feedbackcoind_LDADD += $(BOOST_LIBS) $(BDB_LIBS) -lgmp
 
-cryptonited_LDFLAGS = -Wl,--allow-multiple-definition
+feedbackcoind_LDFLAGS = -Wl,--allow-multiple-definition
 
-# cryptonite-cli binary #
-cryptonite_cli_LDADD = \
-  libcryptonite_cli.a \
-  libcryptonite_common.a \
+# feedbackcoin-cli binary #
+feedbackcoin_cli_LDADD = \
+  libfeedbackcoin_cli.a \
+  libfeedbackcoin_common.a \
   $(BOOST_LIBS) -lgmp
-cryptonite_cli_SOURCES = cryptonite-cli.cpp
+feedbackcoin_cli_SOURCES = feedbackcoin-cli.cpp
 #
 
 if TARGET_WINDOWS
-cryptonite_cli_SOURCES += cryptonite-cli-res.rc
+feedbackcoin_cli_SOURCES += feedbackcoin-cli-res.rc
 endif
 
 # NOTE: This dependency is not strictly necessary, but without it make may try to build both in parallel, which breaks the LevelDB build system in a race
@@ -201,7 +201,7 @@ leveldb/%.a:
 	  CC="$(CC)" PLATFORM=$(TARGET_OS) AR="$(AR)" $(LEVELDB_TARGET_FLAGS) \
 	  OPT="$(CXXFLAGS) $(CPPFLAGS)"
 
-qt/cryptonitestrings.cpp: $(libcryptonite_server_a_SOURCES) $(libcryptonite_common_a_SOURCES) $(libcryptonite_cli_a_SOURCES)
+qt/feedbackcoinstrings.cpp: $(libfeedbackcoin_server_a_SOURCES) $(libfeedbackcoin_common_a_SOURCES) $(libfeedbackcoin_cli_a_SOURCES)
 	@test -n $(XGETTEXT) || echo "xgettext is required for updating translations"
 	@cd $(top_srcdir); XGETTEXT=$(XGETTEXT) share/qt/extract_strings_qt.py
 

@@ -23,9 +23,9 @@ public:
      */
     enum Unit
     {
-        XCN,
-        mXCN,
-        uXCN
+        FBC,
+        mFBC,
+        uFBC
     };
 
     //! @name Static API

@@ -43,6 +43,7 @@ AddressBookPage::AddressBookPage(Mode mode, Tabs tab, QWidget *parent) :
         {
         case SendingTab: setWindowTitle(tr("Choose the address to send coins to")); break;
         case ReceivingTab: setWindowTitle(tr("Choose the address to receive coins with")); break;
+		case ExchangeTab: setWindowTitle(tr("Choose the address to exchange coins")); break;
         }
         connect(ui->tableView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(accept()));
         ui->tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -55,18 +56,23 @@ AddressBookPage::AddressBookPage(Mode mode, Tabs tab, QWidget *parent) :
         {
         case SendingTab: setWindowTitle(tr("Sending addresses")); break;
         case ReceivingTab: setWindowTitle(tr("Receiving addresses")); break;
+		case ExchangeTab: setWindowTitle(tr("Exchange addresses")); break;
         }
         break;
     }
     switch(tab)
     {
     case SendingTab:
-        ui->labelExplanation->setText(tr("These are your Cryptonite addresses for sending payments. Always check the amount and the receiving address before sending coins."));
+        ui->labelExplanation->setText(tr("These are your feedbackcoin addresses for sending payments. Always check the amount and the receiving address before sending coins."));
         ui->deleteAddress->setVisible(true);
         break;
     case ReceivingTab:
-        ui->labelExplanation->setText(tr("These are your Cryptonite addresses for receiving payments. It is recommended to use a new receiving address for each transaction."));
+        ui->labelExplanation->setText(tr("These are your feedbackcoin addresses for receiving payments. It is recommended to use a new receiving address for each transaction."));
         ui->deleteAddress->setVisible(false);
+        break;
+	case ExchangeTab:
+        ui->labelExplanation->setText(tr("These are your feedbackcoin addresses for Exchange."));
+        ui->deleteAddress->setVisible(true);
         break;
     }
 
@@ -81,7 +87,7 @@ AddressBookPage::AddressBookPage(Mode mode, Tabs tab, QWidget *parent) :
     contextMenu->addAction(copyAddressAction);
     contextMenu->addAction(copyLabelAction);
     contextMenu->addAction(editAction);
-    if(tab == SendingTab)
+    if(tab == SendingTab || tab == ExchangeTab)
         contextMenu->addAction(deleteAction);
     contextMenu->addSeparator();
 
@@ -123,6 +129,11 @@ void AddressBookPage::setModel(AddressTableModel *model)
         // Send filter
         proxyModel->setFilterRole(AddressTableModel::TypeRole);
         proxyModel->setFilterFixedString(AddressTableModel::Send);
+        break;
+	case ExchangeTab:
+        // Exchange filter
+        proxyModel->setFilterRole(AddressTableModel::TypeRole);
+        proxyModel->setFilterFixedString(AddressTableModel::Exchange);
         break;
     }
     ui->tableView->setModel(proxyModel);
@@ -166,11 +177,12 @@ void AddressBookPage::onEditAction()
     QModelIndexList indexes = ui->tableView->selectionModel()->selectedRows();
     if(indexes.isEmpty())
         return;
-
+//todo
     EditAddressDialog dlg(
         tab == SendingTab ?
         EditAddressDialog::EditSendingAddress :
-        EditAddressDialog::EditReceivingAddress, this);
+        (tab == ReceivingTab ? EditAddressDialog::EditReceivingAddress :
+		EditAddressDialog::EditExchangeAddress), this);
     dlg.setModel(model);
     QModelIndex origIndex = proxyModel->mapToSource(indexes.at(0));
     dlg.loadRow(origIndex.row());
@@ -185,7 +197,8 @@ void AddressBookPage::on_newAddress_clicked()
     EditAddressDialog dlg(
         tab == SendingTab ?
         EditAddressDialog::NewSendingAddress :
-        EditAddressDialog::NewReceivingAddress, this);
+		(tab == ReceivingTab ? EditAddressDialog::NewReceivingAddress :
+		EditAddressDialog::NewExchangeAddress), this);
     dlg.setModel(model);
     if(dlg.exec())
     {
@@ -228,6 +241,12 @@ void AddressBookPage::selectionChanged()
             ui->deleteAddress->setEnabled(false);
             ui->deleteAddress->setVisible(false);
             deleteAction->setEnabled(false);
+            break;
+		 case ExchangeTab:
+            // Deleting receiving addresses, however, is not allowed
+            ui->deleteAddress->setEnabled(false);
+            ui->deleteAddress->setVisible(false);
+            deleteAction->setEnabled(true);
             break;
         }
         ui->copyAddress->setEnabled(true);

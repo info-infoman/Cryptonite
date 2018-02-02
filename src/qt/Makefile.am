@@ -6,8 +6,8 @@ AM_CPPFLAGS += -I$(top_srcdir)/src \
   $(PROTOBUF_CFLAGS) \
   $(QR_CFLAGS) \
   -fpermissive -ffloat-store -std=c++11 -D__STDC_LIMIT_MACROS -D__USE_MINGW_ANSI_STDIO
-bin_PROGRAMS = cryptonite-qt
-noinst_LIBRARIES = libcryptoniteqt.a
+bin_PROGRAMS = feedbackcoin-qt
+noinst_LIBRARIES = libfeedbackcoinqt.a
 SUBDIRS = . 
 DIST_SUBDIRS = . 
 
@@ -320,15 +320,15 @@ RES_MOVIES = $(wildcard res/movies/spinner-*.png)
 
 BITCOIN_RC = res/bitcoin-qt-res.rc
 
-libcryptoniteqt_a_CPPFLAGS = $(AM_CPPFLAGS) $(QT_INCLUDES) \
+libfeedbackcoinqt_a_CPPFLAGS = $(AM_CPPFLAGS) $(QT_INCLUDES) \
   -I$(top_srcdir)/src/qt/forms $(QT_DBUS_INCLUDES)
-libcryptoniteqt_a_SOURCES = $(BITCOIN_QT_CPP) $(BITCOIN_QT_H) $(QT_FORMS_UI) \
+libfeedbackcoinqt_a_SOURCES = $(BITCOIN_QT_CPP) $(BITCOIN_QT_H) $(QT_FORMS_UI) \
   $(QT_QRC) $(QT_TS) $(PROTOBUF_PROTO) $(RES_ICONS) $(RES_IMAGES) $(RES_MOVIES)
 
-nodist_libcryptoniteqt_a_SOURCES = $(QT_MOC_CPP) $(QT_MOC) $(PROTOBUF_CC) \
+nodist_libfeedbackcoinqt_a_SOURCES = $(QT_MOC_CPP) $(QT_MOC) $(PROTOBUF_CC) \
   $(PROTOBUF_H) $(QT_QRC_CPP)
 
-BUILT_SOURCES = $(nodist_libcryptoniteqt_a_SOURCES)
+BUILT_SOURCES = $(nodist_libfeedbackcoinqt_a_SOURCES)
 
 #Generating these with a half-written protobuf header leads to wacky results.
 #This makes sure it's done.
@@ -336,22 +336,22 @@ $(QT_MOC): $(PROTOBUF_H)
 $(QT_MOC_CPP): $(PROTOBUF_H)
 
 # bitcoin-qt binary #
-cryptonite_qt_CPPFLAGS = $(AM_CPPFLAGS) $(QT_INCLUDES) \
+feedbackcoin_qt_CPPFLAGS = $(AM_CPPFLAGS) $(QT_INCLUDES) \
   -I$(top_srcdir)/src/qt/forms
-cryptonite_qt_SOURCES = bitcoin.cpp
+feedbackcoin_qt_SOURCES = bitcoin.cpp
 if TARGET_DARWIN
-  cryptonite_qt_SOURCES += $(BITCOIN_MM)
+  feedbackcoin_qt_SOURCES += $(BITCOIN_MM)
 endif
 if TARGET_WINDOWS
-  cryptonite_qt_SOURCES += $(BITCOIN_RC)
+  feedbackcoin_qt_SOURCES += $(BITCOIN_RC)
 endif
-cryptonite_qt_LDADD = libcryptoniteqt.a $(LIBBITCOIN_SERVER)
+feedbackcoin_qt_LDADD = libfeedbackcoinqt.a $(LIBBITCOIN_SERVER)
 if ENABLE_WALLET
-cryptonite_qt_LDADD += $(LIBBITCOIN_WALLET)
+feedbackcoin_qt_LDADD += $(LIBBITCOIN_WALLET)
 endif
-cryptonite_qt_LDADD += $(LIBBITCOIN_CLI) $(LIBBITCOIN_COMMON) $(LIBLEVELDB) $(LIBMEMENV) \
+feedbackcoin_qt_LDADD += $(LIBBITCOIN_CLI) $(LIBBITCOIN_COMMON) $(LIBLEVELDB) $(LIBMEMENV) \
   $(BOOST_LIBS) $(QT_LIBS) $(QT_DBUS_LIBS) $(QR_LIBS) $(PROTOBUF_LIBS) $(BDB_LIBS)
-cryptonite_qt_LDFLAGS = $(QT_LDFLAGS)
+feedbackcoin_qt_LDFLAGS = $(QT_LDFLAGS)
 
 # forms/foo.h -> forms/ui_foo.h
 QT_FORMS_H=$(join $(dir $(QT_FORMS_UI)),$(addprefix ui_, $(notdir $(QT_FORMS_UI:.ui=.h))))
@@ -362,10 +362,10 @@ QT_QM=$(QT_TS:.ts=.qm)
 .PHONY: FORCE
 .SECONDARY: $(QT_QM)
 
-cryptonitestrings.cpp: FORCE
-	$(MAKE) -C $(top_srcdir)/src qt/cryptonitestrings.cpp
+feedbackcoinstrings.cpp: FORCE
+	$(MAKE) -C $(top_srcdir)/src qt/feedbackcoinstrings.cpp
 
-translate: cryptonitestrings.cpp $(QT_FORMS_UI) $(QT_FORMS_UI) $(BITCOIN_QT_CPP) $(BITCOIN_QT_H) $(BITCOIN_MM)
+translate: feedbackcoinstrings.cpp $(QT_FORMS_UI) $(QT_FORMS_UI) $(BITCOIN_QT_CPP) $(BITCOIN_QT_H) $(BITCOIN_MM)
 	@test -n $(LUPDATE) || echo "lupdate is required for updating translations"
 	@QT_SELECT=$(QT_SELECT) $(LUPDATE) $^ -locations relative -no-obsolete -ts locale/bitcoin_en.ts
 

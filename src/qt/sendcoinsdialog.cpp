@@ -19,6 +19,7 @@
 #include <QMessageBox>
 #include <QScrollBar>
 #include <QTextDocument>
+#include <QRegExpValidator>
 
 SendCoinsDialog::SendCoinsDialog(QWidget *parent) :
     QDialog(parent),
@@ -34,9 +35,19 @@ SendCoinsDialog::SendCoinsDialog(QWidget *parent) :
 #endif
 
 #if QT_VERSION >= 0x040700
-    ui->msgLabel->setPlaceholderText(tr("Enter a message to include with this transaction"));
+    ui->feedbackLabel->setPlaceholderText(tr("Enter a feed back to include with this negative transaction"));
+	ui->superLabel->setPlaceholderText(tr("Enter URL-point(http(s)://....) to check super transaction"));
+	ui->tokenLabel->setPlaceholderText(tr("Enter a token to check the super transaction"));
 #endif
-
+	ui->tvalueLabel->setValidator( new QRegExpValidator( QRegExp( "[1-9][0-9]{1,19}" ) ) );
+	ui->tokenLabel->setValidator( new QRegExpValidator( QRegExp( ".{1,20}" ) ) );
+	
+	ui->PositiveTransaction->setChecked(true);
+	ui->feedbackLabel->setEnabled(false);
+    ui->superLabel->setEnabled(false);
+	ui->tokenLabel->setEnabled(false);
+	ui->tvalueLabel->setEnabled(false);
+	
     GUIUtil::setupAddressWidget(ui->lineEditCoinControlChange, this);
 
     addEntry();
@@ -76,6 +87,38 @@ SendCoinsDialog::SendCoinsDialog(QWidget *parent) :
     ui->labelCoinControlChange->addAction(clipboardChangeAction);
 
     fNewRecipientAllowed = true;
+}
+
+void SendCoinsDialog::on_PositiveTransaction_clicked()
+{
+    ui->feedbackLabel->setEnabled(false);
+    ui->superLabel->setEnabled(false);
+	ui->tokenLabel->setEnabled(false);
+	ui->tvalueLabel->setEnabled(false);
+	ui->superLabel->clear();
+    ui->feedbackLabel->clear();
+	ui->tokenLabel->clear();
+	ui->tvalueLabel->clear();
+}
+
+void SendCoinsDialog::on_NegativeTransaction_clicked()
+{
+    ui->feedbackLabel->setEnabled(true);
+    ui->superLabel->setEnabled(false);
+	ui->tokenLabel->setEnabled(false);
+	ui->tvalueLabel->setEnabled(false);
+	ui->superLabel->clear();
+	ui->tokenLabel->clear();
+	ui->tvalueLabel->clear();
+}
+
+void SendCoinsDialog::on_SuperTransaction_clicked()
+{
+    ui->feedbackLabel->setEnabled(false);
+    ui->superLabel->setEnabled(true);
+	ui->tokenLabel->setEnabled(true);
+	ui->tvalueLabel->setEnabled(true);
+    ui->feedbackLabel->clear();
 }
 
 void SendCoinsDialog::setModel(WalletModel *model)
@@ -189,7 +232,13 @@ void SendCoinsDialog::on_sendButton_clicked()
     }
 
     // prepare transaction for getting txFee earlier
-    WalletModelTransaction currentTransaction(recipients, ui->msgLabel->text());
+	int txType=0;
+	if (ui->NegativeTransaction->isChecked())
+		txType=1;
+	if (ui->SuperTransaction->isChecked()) 
+		txType=2;
+	
+    WalletModelTransaction currentTransaction(recipients, txType, ui->feedbackLabel->text(), ui->superLabel->text(), ui->tokenLabel->text(), ui->tvalueLabel->text());
     WalletModel::SendCoinsReturn prepareStatus;
     if (model->getOptionsModel()->getCoinControlFeatures()) // coin control enabled
         prepareStatus = model->prepareTransaction(currentTransaction, 0);
@@ -263,7 +312,10 @@ void SendCoinsDialog::clear()
         ui->entries->takeAt(0)->widget()->deleteLater();
     }
     addEntry();
-    ui->msgLabel->clear();
+	ui->superLabel->clear();
+    ui->feedbackLabel->clear();
+	ui->tokenLabel->clear();
+	ui->tvalueLabel->clear();
 
     updateTabsAndLabels();
 }
@@ -559,7 +611,7 @@ void SendCoinsDialog::coinControlChangeEdited(const QString& text)
         }
         else if (!addr.IsValid()) // Invalid address
         {
-            ui->labelCoinControlChangeLabel->setText(tr("Warning: Invalid Cryptonite address"));
+            ui->labelCoinControlChangeLabel->setText(tr("Warning: Invalid FeedBackCoin address"));
         }
         else // Valid address
         {

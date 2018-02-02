@@ -77,6 +77,7 @@ public:
         RecvWithAddress,
         RecvFromOther,
         SendToSelf,
+		Exchange,
 	SetLimit
     };
 

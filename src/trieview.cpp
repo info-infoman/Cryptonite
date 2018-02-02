@@ -189,115 +189,170 @@ bool TrieView::TempApply(CBlock block, list<CTxUndo> &undos){
     set<uint160> setLimit, setTxIn;
 
     BOOST_FOREACH(const CTransaction &tx, block.vtx){
-	if(tx.IsCoinBase()){
-	    TrieNode* node = TrieEngine::Find(0, m_root);
-	    uint64_t coinb=0;
-	    if(node)
-		coinb = node->Balance();  
-    	    if (tx.vout[0].nValue > (uint64_t)GetBlockValue(coinb, block.GetFees())){
-		LogPrintf("Coinbase paid too much!\n");
-		return false;
-	    }
-	}
-
-
-	BOOST_FOREACH(const CTxIn& txin, tx.vin){
-	    TrieNode* node = TrieEngine::Find(txin.pubKey, m_root);
-	    if(!node){
-		LogPrintf("Failed to find node for %s\n", txin.pubKey.GetHex().c_str());
-		return false;
-	    }
-	    CTxUndo undo(node->Key());
-	    undo.m_balance = node->Balance();
-	    undo.m_age = node->Age();
-	    undo.m_limit = node->Limit();
-	    undo.m_futurelimit = node->FutureLimit();
-
-	    if(!tx.fSetLimit){  //Fee on set limit is allowed to surpass limit field to prevent stuck accounts
-		if(limits.find(node->Key()) == limits.end()){
-		    if(txin.nValue > node->Limit()){
-			LogPrintf("Tried to spend past limit %s %ld %ld\n", txin.pubKey.GetHex().c_str(), txin.nValue, node->Limit());
+		if(tx.IsCoinBase()){
+			TrieNode* node = TrieEngine::Find(0, m_root);
+			uint64_t coinb=0;
+			if(node)
+			coinb = node->Balance();  
+				if (tx.vout[0].nValue > (uint64_t)GetBlockValue(coinb, block.GetFees())){
+			LogPrintf("Coinbase paid too much!\n");
 			return false;
-		    }
-		    limits[node->Key()] = node->Limit() - txin.nValue;
-		}else{
-		    if(txin.nValue > limits[node->Key()]){
-			LogPrintf("Tried to spend past limit %s %ld %ld\n", txin.pubKey.GetHex().c_str(), txin.nValue, node->Limit());
+			}
+		}
+		
+		if(tx.txType > 0 && tx.IsCoinBase()){
+			LogPrintf("Coinbase it's positive transaction\n");
 			return false;
-		    }		 
-		    limits[node->Key()] -= txin.nValue;
 		}
-	    }
 
-	    if(txin.nValue > node->Balance()){
-		LogPrintf("Source has insufficient balance %s %ld %ld\n", txin.pubKey.GetHex().c_str(), txin.nValue, node->Balance());
-		//m_root->Print();
-		return false;
-	    }
+		BOOST_FOREACH(const CTxIn& txin, tx.vin){
+			TrieNode* node = TrieEngine::Find(txin.pubKey, m_root);
+			if(!node){
+			LogPrintf("Failed to find node for %s\n", txin.pubKey.GetHex().c_str());
+			return false;
+			}
+			CTxUndo undo(node->Key());
+			undo.m_balance = node->Balance();
+			undo.m_age = node->Age();
+			undo.m_limit = node->Limit();
+			undo.m_futurelimit = node->FutureLimit();
 
-	    if(!tx.fSetLimit && setLimit.count(txin.pubKey)){
-		LogPrintf("Limit switch and transaction in same block\n");
-		return false;	
-	    }
+			if(!tx.fSetLimit){  //Fee on set limit is allowed to surpass limit field to prevent stuck accounts
+			if(limits.find(node->Key()) == limits.end()){
+				if(txin.nValue > node->Limit()){
+				LogPrintf("Tried to spend past limit %s %ld %ld\n", txin.pubKey.GetHex().c_str(), txin.nValue, node->Limit());
+				return false;
+				}
+				limits[node->Key()] = node->Limit() - txin.nValue;
+			}else{
+				if(txin.nValue > limits[node->Key()]){
+				LogPrintf("Tried to spend past limit %s %ld %ld\n", txin.pubKey.GetHex().c_str(), txin.nValue, node->Limit());
+				return false;
+				}		 
+				limits[node->Key()] -= txin.nValue;
+			}
+			}
 
-	    if(tx.fSetLimit && tx.nLimitValue < node->Limit() && setTxIn.count(txin.pubKey)){
-		LogPrintf("Limit switch and transaction in same block\n");
-		return false;
-	    }
+			if(txin.nValue > node->Balance()){
+			LogPrintf("Source has insufficient balance %s %ld %ld\n", txin.pubKey.GetHex().c_str(), txin.nValue, node->Balance());
+			//m_root->Print();
+			return false;
+			}
 
-	    if(block.nHeight - node->Age() > MIN_LIMIT_TIME){
-		if(node->FutureLimit() != node->Limit() && setTxIn.count(txin.pubKey)){
-		    LogPrintf("Limit switch and transaction in same block\n");
-		    return false;
+			if(!tx.fSetLimit && setLimit.count(txin.pubKey)){
+			LogPrintf("Limit switch and transaction in same block\n");
+			return false;	
+			}
+
+			if(tx.fSetLimit && tx.nLimitValue < node->Limit() && setTxIn.count(txin.pubKey)){
+			LogPrintf("Limit switch and transaction in same block\n");
+			return false;
+			}
+
+			if(block.nHeight - node->Age() > MIN_LIMIT_TIME){
+			if(node->FutureLimit() != node->Limit() && setTxIn.count(txin.pubKey)){
+				LogPrintf("Limit switch and transaction in same block\n");
+				return false;
+			}
+				node->SetLimit(node->FutureLimit());		
+			}
+
+			//No node updates until tx guaranteed to succeed!!!
+			if(tx.fSetLimit){
+			node->SetFutureLimit(tx.nLimitValue);
+			//Instant update if limit is lower
+			if(node->FutureLimit() < node->Limit())
+				node->SetLimit(node->FutureLimit());
+
+			setLimit.insert(txin.pubKey);
+			}else{
+			setTxIn.insert(txin.pubKey);
+			}
+			
+			node->SetAge(block.nHeight);
+				
+			node->SetBalance(node->Balance() - txin.nValue);
+			if(node->Balance() < MIN_BALANCE){
+			TrieEngine::Remove(&m_root,node);
+			undo.m_destroy=true;
+			}
+			undos.push_back(undo);
 		}
- 	        node->SetLimit(node->FutureLimit());		
-	    }
-
-	    //No node updates until tx guaranteed to succeed!!!
-	    if(tx.fSetLimit){
-		node->SetFutureLimit(tx.nLimitValue);
-		//Instant update if limit is lower
-		if(node->FutureLimit() < node->Limit())
-		    node->SetLimit(node->FutureLimit());
-
-		setLimit.insert(txin.pubKey);
-	    }else{
-		setTxIn.insert(txin.pubKey);
-	    }
-	    
-	    node->SetAge(block.nHeight);
-		    
-	    node->SetBalance(node->Balance() - txin.nValue);
-	    if(node->Balance() < MIN_BALANCE){
-		TrieEngine::Remove(&m_root,node);
-		undo.m_destroy=true;
-	    }
-	    undos.push_back(undo);
+		
+		BOOST_FOREACH(const CTxOut& txout, tx.vout){
+			TrieNode* node = TrieEngine::Find(txout.pubKey, m_root);
+			TrieNode* rootnode = TrieEngine::Find(0, m_root);
+			bool isRoot=false;
+			uint64_t addToRoot=0; 
+			
+			if(node){
+				if(rootnode){
+					if(rootnode->Key().GetHex()==node->Key().GetHex()){
+						bool isRoot=true;
+					}
+				}
+				CTxUndo undo(node->Key());
+				undo.m_balance = node->Balance();
+				undo.m_age = node->Age();
+				undo.m_limit = node->Limit();
+				undo.m_futurelimit = node->FutureLimit();
+				
+				//node->SetAge(block.nHeight); //No age update on deposit
+				
+				//если негатив+не награда
+				if(tx.txType == 1){
+					if(node->Balance() <= txout.nValue){
+						if(!isRoot){
+							node->SetBalance(0);
+							TrieEngine::Remove(&m_root,node);
+							undo.m_destroy=true;
+							addToRoot=txout.nValue+node->Balance();
+							std::cout << " Node " << node->Key().GetHex() << " balance <= " << txout.nValue << " , can't set negative or zero node, delete node from trie" << std::endl;
+						}else{
+							addToRoot=txout.nValue;
+						}
+					}else{
+						std::cout << " Negative tx for node " << txout.pubKey.GetHex() << " in trie, updated balance= " << node->Balance() - txout.nValue  << std::endl;
+						node->SetBalance(node->Balance() - txout.nValue);
+						addToRoot=(txout.nValue*2);
+					}
+				}else{
+					node->SetBalance(node->Balance() + txout.nValue);
+					std::cout << " Positive tx for node " << txout.pubKey.GetHex() << " in trie, updated balance= "<< node->Balance() + txout.nValue  << std::endl;
+				}
+				undos.push_back(undo);
+			}else{
+				if(tx.txType == 1){
+					addToRoot=txout.nValue;
+					std::cout << " Node is empty and balance is 0, can't create negative node " << std::endl;
+				}else{
+					node = new TrieNode(NODE_LEAF);
+					node->SetKey(txout.pubKey);
+					node->SetAge(block.nHeight);
+					node->SetBalance(txout.nValue);
+					std::cout << " Create new node "<< txout.pubKey.GetHex() <<" in trie witch balance= "<< txout.nValue  << std::endl;
+					TrieEngine::Insert(&m_root,node);
+					CTxUndo undo(node->Key());
+					undo.m_create = true;
+					undos.push_back(undo);
+				}				
+			}
+			//Returning negative coins to the coinbase
+			if(rootnode){
+				if(addToRoot>0){
+					CTxUndo undo(rootnode->Key());
+					undo.m_balance = rootnode->Balance();
+					undo.m_age = rootnode->Age();
+					undo.m_limit = rootnode->Limit();
+					undo.m_futurelimit = rootnode->FutureLimit();
+					std::cout << " Updated balance of rootnode = "<< rootnode->Balance() <<" + "<< addToRoot << std::endl;
+					rootnode->SetBalance(rootnode->Balance() + addToRoot);
+					
+					undos.push_back(undo);
+				}
+			}
+		}
 	}
-
-        BOOST_FOREACH(const CTxOut& txout, tx.vout){
-	    TrieNode* node = TrieEngine::Find(txout.pubKey, m_root);
-	    if(node){
-		CTxUndo undo(node->Key());
-		undo.m_balance = node->Balance();
-		undo.m_age = node->Age();
-		undo.m_limit = node->Limit();
-		undo.m_futurelimit = node->FutureLimit();
-		undos.push_back(undo);
-		//node->SetAge(block.nHeight); //No age update on deposit
-		node->SetBalance(node->Balance() + txout.nValue);
-	    }else{
-		node = new TrieNode(NODE_LEAF);
-		node->SetKey(txout.pubKey);
-		node->SetAge(block.nHeight);
-		node->SetBalance(node->Balance() + txout.nValue);
-		TrieEngine::Insert(&m_root,node);
-		CTxUndo undo(node->Key());
-		undo.m_create = true;
-		undos.push_back(undo);
-	    }
-        }
-    }
     reverse(undos.begin(),undos.end());
     return true;
 }
@@ -373,7 +428,7 @@ bool TrieView::Apply(CBlockIndex *pindex){
 	Unapply(undos);
 	return false;
     }
-
+	
     if(m_root->Hash()!=block.hashAccountRoot){
 	LogPrintf("Master hash mismatch: %s %s %s\n", pindex->GetBlockHash().GetHex().c_str(),
 		m_root->Hash().GetHex().c_str(), block.hashAccountRoot.GetHex().c_str());
