@@ -308,8 +308,7 @@ CBlockTemplate* CreateNewBlock(uint160 pubKey)
 				}
 				//Remove if TxFees to small to check of supertransactions 
 				//std::cout << " minastxfee = ?" << nTxFees << " < " << GetArg("-minastxfee", nTransactionFFee) << std::endl;
-				int64_t nTransactionFee;
-				if(nTxFees<GetArg("-minastxfee", nTransactionFFee)){
+				if(nTxFees<GetArg("-minastxfee", 1000)){
 					mempool.remove(tx);
 					continue;
 				}
