@@ -26,5 +26,6 @@ bool CheckWork(CBlock* pblock, uint256 hashTarget, CWallet& wallet);
 
 extern double dHashesPerSec;
 extern int64_t nHPSTimerStart;
+extern int64_t nTransactionFee;
 
 #endif // BITCOIN_MINER_H
