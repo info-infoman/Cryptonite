@@ -1,10 +1,18 @@
-Cryptonite Core integration/staging tree
+FeedBackCoin based on Cryptonite Core integration/staging tree
 =====================================
 
-http://cryptonite.info
+https://github.com/info-infoman/FeedBackCoin
 
+Copyright (c) 2017 The FeedBackCoin Project<br />
 Copyright (c) 2014 The Mini-blockchain Project<br />
 Copyright (c) 2009-2014 Bitcoin Core Developers
+
+What is FeedBackCoin
+----------------
+
+FeedBackCoin is the first cryptocurrency to implement the negative feed back rating for the world economics scheme along with many other innovative features. FeedBackCoin is a fork of the Cryptonite core but the code has been extensively modified and expanded upon. Innovative new features include negative, information and super transactions. The negative feed back rating for the world economics scheme alleviates interaction  between economic subjects, аllows punishing liars and scammers in the cryptoworld. Information and super transactions allow the creation of truly independent decentralized exchange markets.
+
+For more information see https://github.com/info-infoman/FeedBackCoin/wiki
 
 What is Cryptonite
 ----------------
@@ -16,7 +24,7 @@ For more information see http://cryptonite.info
 License
 -------
 
-Cryptonite Core is released under the terms of the MIT license. See [COPYING](COPYING) for more
+FeedBackCoin Core is released under the terms of the MIT license. See [COPYING](COPYING) for more
 information or see http://opensource.org/licenses/MIT.
 
 Development process
@@ -25,7 +33,7 @@ Development process
 Developers work in their own trees, then submit pull requests when they think
 their feature or bug fix is ready.
 
-If it is a simple/trivial/non-controversial change, then one of the Cryptonite
+If it is a simple/trivial/non-controversial change, then one of the FeedBackCoin
 development team members simply pulls it.
 
 If it is a *more complicated or potentially controversial* change, then the patch
