@@ -1,4 +1,5 @@
-FeedBackCoin based on Cryptonite Core integration/staging tree
+[EN] FeedBackCoin based on Cryptonite Core integration/staging tree
+[RU] FeedBackCoin основан на Cryptonite Core integration/staging tree
 =====================================
 
 https://github.com/info-infoman/FeedBackCoin
@@ -7,12 +8,19 @@ Copyright (c) 2017 The FeedBackCoin Project<br />
 Copyright (c) 2014 The Mini-blockchain Project<br />
 Copyright (c) 2009-2014 Bitcoin Core Developers
 
-What is FeedBackCoin
+[EN] What is FeedBackCoin
 ----------------
 
 FeedBackCoin is the first cryptocurrency to implement the negative feed back rating for the world economics scheme along with many other innovative features. FeedBackCoin is a fork of the Cryptonite core but the code has been extensively modified and expanded upon. Innovative new features include negative, information and super transactions. The negative feed back rating for the world economics scheme alleviates interaction  between economic subjects, аllows punishing liars and scammers in the cryptoworld. Information and super transactions allow the creation of truly independent decentralized exchange markets.
 
 For more information see https://github.com/info-infoman/FeedBackCoin/wiki
+
+[RU] Что такое FeedBackCoin
+----------------
+
+FeedBackCoin это первая в мире криптовалюта в которой внедрен механизм децентрализованного рейтинга экономических субъектов через негативную обратную связь денег. FeedBackCoin базируется на основе криптовалюты Cryptonite core, но исходный код глубоко модифицирован. Внедрены такие инновационные механизмы как негативные, информационные и супер транзакции. Децентрализованный рейтинг на основе негативной обратной связи денег способствует преображению взаимодействий между экокномическими субьектами общества, позволяет без участия государств и банков, децентрализованно вести борьбу против воров и мошенников. Информационные и супер-транзакции позволяют создавать понастоящему децентрализованные рынки обмена.
+
+Более подробно здесь - https://github.com/info-infoman/FeedBackCoin/wiki
 
 What is Cryptonite
 ----------------
